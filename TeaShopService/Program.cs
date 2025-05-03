@@ -1,4 +1,4 @@
-
+﻿
 namespace TeaShopService
 {
     public class Program
@@ -16,15 +16,22 @@ namespace TeaShopService
 
             var app = builder.Build();
 
+
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            //if (app.Environment.IsDevelopment())
+            //{
+            app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("http://localhost:5000/swagger/v1/swagger.json", "TeaShopService");
+                    c.SwaggerEndpoint("http://localhost:5100/swagger/v1/swagger.json", "OrderService");
+                    // c.SwaggerEndpoint("http://localhost:5200/swagger/v1/swagger.json", "InvoiceService");
+                    // c.SwaggerEndpoint("http://localhost:5300/swagger/v1/swagger.json", "UserService");
+                });
+
+            //}
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
 
 

@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  orderservice:
+    build:
+      context: .
+      dockerfile: OrderService/Dockerfile
+    ports:
+      - "${ORDERSERVICE_HTTP_PORT}:8080"
+
+  teashopservice:
+    build:
+      context: .
+      dockerfile: TeaShopService/Dockerfile
+    ports:
+      - "${TEASHOP_HTTP_PORT}:8080"
