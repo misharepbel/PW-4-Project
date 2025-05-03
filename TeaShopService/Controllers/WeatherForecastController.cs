@@ -1,22 +1,17 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace TeaShopService.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class WeatherForecastController(ILogger<WeatherForecastController> logger) : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
-        }
+        private readonly ILogger<WeatherForecastController> _logger = logger;
 
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
@@ -28,6 +23,19 @@ namespace TeaShopService.Controllers
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
+        }
+
+        [HttpGet("TestOrderServiceResponse")]
+        public async Task<IActionResult> CallOrderService([FromServices] IHttpClientFactory httpClientFactory)
+        {
+            var client = httpClientFactory.CreateClient("OrderService");
+            var response = await client.GetAsync("/api/test");
+
+            if (!response.IsSuccessStatusCode)
+                return StatusCode((int)response.StatusCode, "Failed to call OrderService");
+
+            var content = await response.Content.ReadAsStringAsync();
+            return Ok($"OrderService responded: {content}");
         }
     }
 }

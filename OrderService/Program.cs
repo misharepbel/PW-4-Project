@@ -10,7 +10,7 @@
             {
                 options.AddDefaultPolicy(policy =>
                 {
-                    policy.WithOrigins("http://localhost:5000") // from TeaShopService
+                    policy.WithOrigins("http://teashopservice:8080") // from TeaShopService
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
@@ -26,7 +26,7 @@
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
 
