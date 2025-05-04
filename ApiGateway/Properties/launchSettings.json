@@ -4,12 +4,12 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:21435",
-      "sslPort": 44300
+      "applicationUrl": "http://localhost:21436",
+      "sslPort": 44301
     }
   },
   "profiles": {
-    "OrderService": {
+    "ApiGateway": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

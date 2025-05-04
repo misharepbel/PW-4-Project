@@ -3,10 +3,12 @@
 namespace OrderService.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("")]
     public class TestController : ControllerBase
     {
         [HttpGet]
         public IActionResult Get() => Ok("OrderService is working from Docker!");
+        [HttpGet("hello")]
+        public IActionResult Hello() => Ok("Root says hello!");
     }
 }

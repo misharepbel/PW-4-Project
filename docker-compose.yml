@@ -1,19 +1,19 @@
-version: '3.4'
+﻿version: '3.4'
 
 services:
   orderservice:
     build:
       context: .
       dockerfile: OrderService/Dockerfile
-    ports:
-      - "${ORDERSERVICE_HTTP_PORT}:8080"
+    expose:
+      - "8080"
 
-  teashopservice:
+  apigateway:
     build:
       context: .
-      dockerfile: TeaShopService/Dockerfile
+      dockerfile: ApiGateway/Dockerfile
     ports:
-      - "${TEASHOP_HTTP_PORT}:8080"
+      - "8080:8080"
     depends_on:
       - orderservice
 

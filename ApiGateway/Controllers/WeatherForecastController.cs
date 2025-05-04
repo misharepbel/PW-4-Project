@@ -29,7 +29,7 @@ namespace TeaShopService.Controllers
         public async Task<IActionResult> CallOrderService([FromServices] IHttpClientFactory httpClientFactory)
         {
             var client = httpClientFactory.CreateClient("OrderService");
-            var response = await client.GetAsync("/api/test");
+            var response = await client.GetAsync("");
 
             if (!response.IsSuccessStatusCode)
                 return StatusCode((int)response.StatusCode, "Failed to call OrderService");
