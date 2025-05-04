@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeaShopService", "TeaShopService\TeaShopService.csproj", "{E64E7A5A-ADEF-496F-8787-381815422536}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService", "OrderService\OrderService.csproj", "{877F88B3-42D6-4856-B23C-3946191C3459}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderService", "OrderService\OrderService.csproj", "{877F88B3-42D6-4856-B23C-3946191C3459}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{EDE56AFE-779F-441F-8A0A-A71B541348F1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{84F2AECC-7AE1-41CD-970C-54ADD71D5381}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E64E7A5A-ADEF-496F-8787-381815422536}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E64E7A5A-ADEF-496F-8787-381815422536}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E64E7A5A-ADEF-496F-8787-381815422536}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E64E7A5A-ADEF-496F-8787-381815422536}.Release|Any CPU.Build.0 = Release|Any CPU
 		{877F88B3-42D6-4856-B23C-3946191C3459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{877F88B3-42D6-4856-B23C-3946191C3459}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{877F88B3-42D6-4856-B23C-3946191C3459}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +23,10 @@ Global
 		{EDE56AFE-779F-441F-8A0A-A71B541348F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDE56AFE-779F-441F-8A0A-A71B541348F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDE56AFE-779F-441F-8A0A-A71B541348F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84F2AECC-7AE1-41CD-970C-54ADD71D5381}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84F2AECC-7AE1-41CD-970C-54ADD71D5381}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84F2AECC-7AE1-41CD-970C-54ADD71D5381}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84F2AECC-7AE1-41CD-970C-54ADD71D5381}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

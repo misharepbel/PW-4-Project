@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "TeaShopService": {
+    "ApiGateway": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
