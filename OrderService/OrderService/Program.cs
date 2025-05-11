@@ -1,7 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using OrderService.Application.Handlers;
+using OrderService.Application.Services;
+using OrderService.Domain.Repositories;
 using OrderService.Infrastructure.Data;
 using OrderService.Infrastructure.Repositories;
+using System.Net.NetworkInformation;
+using System.Reflection;
 
 namespace OrderService
 {
@@ -10,6 +14,8 @@ namespace OrderService
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddScoped<IOrderService, Application.Services.OrderService>();
 
             builder.Services.AddCors(options =>
             {
@@ -24,6 +30,10 @@ namespace OrderService
             builder.Services.AddDbContext<OrdersDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+            builder.Services.AddMediatR(cfg =>
+                cfg.RegisterServicesFromAssemblies(
+                    Assembly.GetExecutingAssembly(),                // OrderService.dll
+                    typeof(CreateOrderCommandHandler).Assembly));
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

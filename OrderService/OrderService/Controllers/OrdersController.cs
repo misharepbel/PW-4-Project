@@ -1,63 +1,45 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.Application.DTO;
-using OrderService.Domain.Models;
-using OrderService.Infrastructure.Repositories;
+using OrderService.Application.Commands;
+using OrderService.Application.Queries;
 
 namespace OrderService.Controllers
 {
     [ApiController]
     [Route("")]
-    public class OrdersController : ControllerBase
+    public class OrdersController(IMediator m) : ControllerBase
     {
-        private readonly IOrderRepository _repo;
-        public OrdersController(IOrderRepository repo) => _repo = repo;
+        private readonly IMediator _m = m;
 
-        [HttpGet("/get/{id}")]
-        public async Task<ActionResult<OrderDto>> Get(Guid id)
-        {
-            var order = await _repo.GetByIdAsync(id);
-            if (order is null) return NotFound();
-
-            var dto = new OrderDto
-            {
-                Id = order.Id,
-                CustomerName = order.CustomerName,
-                CreatedAt = order.CreatedAt,
-                Status = order.Status,
-                Items = order.Items.Select(i => new OrderItemDto
-                {
-                    Id = i.Id,
-                    ProductName = i.ProductName,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice
-                }).ToList()
-            };
-            return Ok(dto);
-        }
+        [HttpGet]
+        public Task<ActionResult<Guid>> HealthCheck()
+            => Task.FromResult<ActionResult<Guid>>(Ok("OrderService is listening..."));
 
         [HttpPost("/add")]
         public async Task<ActionResult<Guid>> Create(CreateOrderDto dto)
-        {
-            var order = new Order
-            {
-                Id = Guid.NewGuid(),
-                CustomerName = dto.CustomerName,
-                CreatedAt = DateTime.UtcNow,
-                Status = "New",
-                Items = dto.Items.Select(i => new OrderItem
-                {
-                    Id = Guid.NewGuid(),
-                    ProductName = i.ProductName,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice
-                }).ToList()
-            };
+            => Ok(await _m.Send(new CreateOrderCommand(dto)));
 
-            await _repo.AddAsync(order);
-            return CreatedAtAction(nameof(Get), new { id = order.Id }, order.Id);
+        [HttpGet("/get/{id:guid}")]
+        public async Task<ActionResult<OrderDto>> Get(Guid id)
+            => Ok(await _m.Send(new GetOrderByIdQuery(id)));
+
+        [HttpGet("/get")]
+        public async Task<ActionResult<List<OrderDto>>> GetAll()
+            => Ok(await _m.Send(new GetOrdersQuery()));
+
+        [HttpPut("/status/{id:guid}")]
+        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] string status)
+        {
+            await _m.Send(new UpdateOrderStatusCommand(id, status));
+            return NoContent();
+        }
+
+        [HttpDelete("/delete/{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _m.Send(new DeleteOrderCommand(id));
+            return NoContent();
         }
     }
 }

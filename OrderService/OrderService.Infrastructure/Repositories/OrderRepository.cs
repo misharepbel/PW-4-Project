@@ -1,23 +1,45 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OrderService.Domain.Models;
+using OrderService.Domain.Entities;
+using OrderService.Domain.Repositories;
 using OrderService.Infrastructure.Data;
-using OrderService.Infrastructure.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OrderService.Infrastructure.Repositories
 {
-    public class OrderRepository(OrdersDbContext db) : IOrderRepository
+    public class OrderRepository : IOrderRepository
     {
-        private readonly OrdersDbContext _db = db;
+        private readonly OrdersDbContext _db;
 
-        public async Task<Order?> GetByIdAsync(Guid id)
-        {
-            return await _db.Orders.FirstOrDefaultAsync(o => o.Id == id);
-        }
+        public OrderRepository(OrdersDbContext db) => _db = db;
 
         public async Task AddAsync(Order order)
         {
             _db.Orders.Add(order);
             await _db.SaveChangesAsync();
         }
+
+        public Task<Order?> GetByIdAsync(Guid id) =>
+            _db.Orders
+               .Include(o => o.OrderItems)
+               .SingleOrDefaultAsync(o => o.Id == id);
+
+        public async Task<List<Order>> GetAllAsync() =>
+            await _db.Orders
+                     .Include(o => o.OrderItems)
+                     .ToListAsync();
+
+        public async Task DeleteAsync(Guid id)
+        {
+            var order = await _db.Orders.FindAsync(id);
+            if (order is null) return;
+
+            _db.Orders.Remove(order);
+            await _db.SaveChangesAsync();
+        }
+
+        public Task SaveChangesAsync() => _db.SaveChangesAsync();
     }
 }

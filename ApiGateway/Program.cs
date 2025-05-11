@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Yarp.ReverseProxy.Swagger.Extensions;
+using System.Diagnostics;
 
 
 namespace ApiGateway
@@ -28,15 +29,20 @@ namespace ApiGateway
 
                         • The default “Gateway” doc is intentionally empty – it only serves
                           as a starting page.
+
+                        ⚠️  It can take a few seconds after startup for downstream service
+                           Swagger documents to become available, so changing the swagger might result in an error.
                         """
                 });
             });
 
 
-            var servicesSection = builder.Configuration.GetSection("Services");
+
+            var servicesSection = builder.Configuration.GetSection("ReverseProxy:Services");
 
             foreach (var service in servicesSection.GetChildren())
             {
+                Debug.Print(service.Key + " key from the foreach loop");
                 var address = service.Value;
                 if (!string.IsNullOrWhiteSpace(address))
                 {

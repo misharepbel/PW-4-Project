@@ -1,13 +1,7 @@
-﻿namespace OrderService.Application.DTO
+﻿public class OrderItemDto
 {
-    /// <summary>
-    /// DTO returned to clients representing an existing order item
-    /// </summary>
-    public class OrderItemDto
-    {
-        public Guid Id { get; set; }
-        public string ProductName { get; set; } = string.Empty;
-        public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
-    }
+    public Guid ProductId { get; set; }
+    public string ProductName { get; set; } = "Unknown";
+    public int Quantity { get; set; }
+    public decimal UnitPrice { get; set; }
 }

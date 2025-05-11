@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OrderService.Domain.Models;
-using System.Collections.Generic;
+using OrderService.Domain.Entities;
 
-namespace OrderService.Infrastructure.Data;
-public class OrdersDbContext(DbContextOptions<OrdersDbContext> opts) : DbContext(opts)
+public class OrdersDbContext : DbContext
 {
+    public OrdersDbContext(DbContextOptions<OrdersDbContext> opt) : base(opt) { }
+
     public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 }

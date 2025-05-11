@@ -1,14 +1,15 @@
-﻿namespace OrderService.Application.DTO
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace OrderService.Application.DTO
 {
-    /// <summary>
-    /// DTO returned to clients representing an existing order
-    /// </summary>
-    public class OrderDto
+    public sealed class OrderDto
     {
-        public Guid Id { get; set; }
-        public string CustomerName { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
-        public string Status { get; set; } = string.Empty;
-        public List<OrderItemDto> Items { get; set; } = new();
+        [Key]
+        public Guid Id { get; init; } = Guid.NewGuid();
+        public Guid UserId { get; init; }
+        public DateTime OrderDate { get; init; }
+        public string Status { get; init; } = default!;
+        public List<OrderItemDto> Items { get; init; } = [];
+        public decimal Total => Items.Sum(i => i.UnitPrice * i.Quantity);
     }
 }

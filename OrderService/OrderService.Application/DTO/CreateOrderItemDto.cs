@@ -1,12 +1,7 @@
-﻿namespace OrderService.Application.DTO
+﻿public sealed class CreateOrderItemDto
 {
-    /// <summary>
-    /// DTO used when creating a new order item from client input
-    /// </summary>
-    public class CreateOrderItemDto
-    {
-        public string ProductName { get; set; } = string.Empty;
-        public int Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
-    }
+    public Guid ProductId { get; init; }
+    public string ProductName { get; init; } = "Unknown";
+    public int Quantity { get; init; }
+    public decimal UnitPrice { get; init; }
 }
