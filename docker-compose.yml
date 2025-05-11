@@ -1,12 +1,24 @@
 ﻿version: '3.4'
 
 services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+        SA_PASSWORD: MyPassw0rd!
+        ACCEPT_EULA: "Y"
+    ports:
+        - "1433:1433"
   orderservice:
     build:
-      context: .
+      context: ./OrderService
       dockerfile: OrderService/Dockerfile
+    environment:
+      #extract the password to a .env later
+      ConnectionStrings__Default: "Server=sqlserver;Database=OrdersDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
     expose:
       - "8080"
+    depends_on:
+      - sqlserver
 
   apigateway:
     build:
@@ -16,4 +28,8 @@ services:
       - "8080:8080"
     depends_on:
       - orderservice
+      
 
+ 
+  
+  
