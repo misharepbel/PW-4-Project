@@ -1,4 +1,9 @@
-﻿namespace OrderService
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using OrderService.Infrastructure.Data;
+using OrderService.Infrastructure.Repositories;
+
+namespace OrderService
 {
     public class Program
     {
@@ -16,14 +21,26 @@
                 });
             });
 
+            builder.Services.AddDbContext<OrdersDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
+                db.Database.Migrate();
+            }
+
             app.UseCors();
 
             app.UseSwagger();
+
             app.UseSwaggerUI();
 
             //app.UseHttpsRedirection();

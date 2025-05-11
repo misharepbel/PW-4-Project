@@ -1,6 +1,10 @@
-﻿using Yarp.ReverseProxy;
+﻿using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Yarp.ReverseProxy.Swagger.Extensions;
 
-namespace TeaShopService
+
+namespace ApiGateway
 {
     public class Program
     {
@@ -10,7 +14,24 @@ namespace TeaShopService
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "ApiGateway",
+                    Version = "v1",
+                    Description = """
+                        This is the entry point for all TeaShop micro-services.
+
+                        • Select **OrderService V1** in the drop-down (top right) to browse
+                          the OrderService endpoints routed through the `/orders` prefix.
+
+                        • The default “Gateway” doc is intentionally empty – it only serves
+                          as a starting page.
+                        """
+                });
+            });
+
 
             var servicesSection = builder.Configuration.GetSection("Services");
 
@@ -26,15 +47,27 @@ namespace TeaShopService
                 }
             }
 
+            var rpSection = builder.Configuration.GetSection("ReverseProxy");
 
-            //YARP
-            builder.Services.AddReverseProxy()
-                .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+            builder.Services
+                .AddReverseProxy()
+                .LoadFromConfig(rpSection)
+                .AddSwagger(rpSection);
+
+            builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
             var app = builder.Build();
 
             app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwaggerUI(ui =>
+            {
+                ui.DocumentTitle = "TeaShop – API Gateway";
+
+                ui.SwaggerEndpoint("/swagger/v1/swagger.json", "ApiGateway V1");
+                ui.SwaggerEndpoint("/swagger/OrderServiceCluster/swagger.json", "OrderService V1");
+
+                ui.DefaultModelsExpandDepth(-1);
+            });
 
             app.UseHttpsRedirection();
             app.UseAuthorization();
