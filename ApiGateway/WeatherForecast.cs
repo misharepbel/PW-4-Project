@@ -1,4 +1,4 @@
-namespace TeaShopService
+namespace ApiGateway
 {
     public class WeatherForecast
     {
