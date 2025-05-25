@@ -3,13 +3,42 @@ using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Yarp.ReverseProxy.Swagger.Extensions;
 using System.Diagnostics;
+using System.Xml.Linq;
 
 
 namespace ApiGateway
 {
     public class Program
     {
-        public static void Main(string[] args)
+        // a method used to wait for microservices to start listening
+        private static async Task WaitForService(string name, string url, int maxRetries = 10, int delaySeconds = 2)
+        {
+            using var httpClient = new HttpClient();
+
+            for (int i = 0; i < maxRetries; i++)
+            {
+                try
+                {
+                    var response = await httpClient.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine($"{name} is available.");
+                        return;
+                    }
+                }
+                catch
+                {
+                   // ignore refused connection
+                }
+
+                Debug.Print($"Waiting for {name}... retry {i + 1}/{maxRetries}");
+                await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+            }
+
+            Debug.Print($"⚠️ {name} did not respond after {maxRetries} retries.");
+        }
+
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +71,8 @@ namespace ApiGateway
 
             foreach (var service in servicesSection.GetChildren())
             {
-                Debug.Print(service.Key + " key from the foreach loop");
+                //Debug.Print(service.Key + " key from the foreach loop");
+                var name = service.Key;
                 var address = service.Value;
                 if (!string.IsNullOrWhiteSpace(address))
                 {
@@ -50,6 +80,9 @@ namespace ApiGateway
                     {
                         client.BaseAddress = new Uri(address);
                     });
+                    // waiting for services to start listening   
+                    var swaggerUrl = $"{address.TrimEnd('/')}";
+                    await WaitForService(name, swaggerUrl);
                 }
             }
 
@@ -65,6 +98,7 @@ namespace ApiGateway
             var app = builder.Build();
 
             app.UseSwagger();
+
             app.UseSwaggerUI(ui =>
             {
                 ui.DocumentTitle = "TeaShop – API Gateway";
@@ -82,7 +116,7 @@ namespace ApiGateway
             app.MapControllers();
             app.MapReverseProxy();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

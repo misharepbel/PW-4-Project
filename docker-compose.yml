@@ -40,8 +40,11 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - orderservice
-      - userservice
+      userservice:
+         condition: service_started
+      orderservice:
+         condition: service_started
+
       
 
  
