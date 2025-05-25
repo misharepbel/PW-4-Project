@@ -16,6 +16,9 @@ todo.txt
 # Mono auto generated files
 mono_crash.*
 
+# RSA keys
+rsa/private.pem
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
