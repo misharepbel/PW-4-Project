@@ -71,6 +71,7 @@ namespace ApiGateway
 
                 ui.SwaggerEndpoint("/swagger/v1/swagger.json", "ApiGateway V1");
                 ui.SwaggerEndpoint("/swagger/OrderServiceCluster/swagger.json", "OrderService V1");
+                ui.SwaggerEndpoint("/swagger/UserServiceCluster/swagger.json", "UserService V1");
 
                 ui.DefaultModelsExpandDepth(-1);
             });
