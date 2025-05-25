@@ -1,7 +1,10 @@
-﻿public sealed class CreateOrderItemDto
+﻿namespace OrderService.Application.DTO
 {
-    public Guid ProductId { get; init; }
-    public string ProductName { get; init; } = "Unknown";
-    public int Quantity { get; init; }
-    public decimal UnitPrice { get; init; }
+    public sealed class CreateOrderItemDto
+    {
+        public Guid ProductId { get; init; }
+        public string ProductName { get; init; } = "Unknown";
+        public int Quantity { get; init; }
+        public decimal UnitPrice { get; init; }
+    }
 }

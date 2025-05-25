@@ -17,9 +17,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Application", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Infrastructure", "OrderService\OrderService.Infrastructure\OrderService.Infrastructure.csproj", "{0985353F-01F5-4A74-8234-6E72F0826A89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService", "..\CatalogService\CatalogService.csproj", "{5997BBD1-D1D0-4159-94B1-B6ABDAA6EA36}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService", "CatalogService\CatalogService.csproj", "{5997BBD1-D1D0-4159-94B1-B6ABDAA6EA36}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "..\UserService\UserService.csproj", "{2BAC03B4-E712-4308-A995-BBC5A2F59C7A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\UserService.csproj", "{2BAC03B4-E712-4308-A995-BBC5A2F59C7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
