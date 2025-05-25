@@ -20,6 +20,19 @@ services:
     depends_on:
       - sqlserver
 
+  userservice:
+      build:
+        context: ./UserService
+        dockerfile: UserService.API/Dockerfile
+      environment:
+        ConnectionStrings__Default: "Server=sqlserver;Database=UsersDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+      expose:
+        - "8080"
+      depends_on:
+        - sqlserver
+      volumes:
+        - ./rsa:/app/rsa:ro
+
   apigateway:
     build:
       context: .
@@ -28,6 +41,7 @@ services:
       - "8080:8080"
     depends_on:
       - orderservice
+      - userservice
       
 
  
