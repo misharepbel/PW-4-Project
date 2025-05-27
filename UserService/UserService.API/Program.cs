@@ -7,6 +7,7 @@ using UserService.Domain.Entities;
 using UserService.Infrastructure.Seed;
 using System.Security.Cryptography;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace UserService.API
 {
@@ -88,6 +89,7 @@ namespace UserService.API
             {
                 var context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
                 var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+                await context.Database.MigrateAsync();
 
                 await UserSeeder.SeedAsync(context, hasher);
             }

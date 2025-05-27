@@ -33,6 +33,18 @@ services:
       volumes:
         - ./rsa:/app/rsa:ro
 
+  catalogservice:
+    build:
+      context: ./CatalogService
+      dockerfile: CatalogService.API/Dockerfile
+    environment:
+      ConnectionStrings__Default: "Server=sqlserver;Database=CatalogDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+    expose:
+      - "8080"
+    depends_on:
+      - sqlserver
+
+
   apigateway:
     build:
       context: .
