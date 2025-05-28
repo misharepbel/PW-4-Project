@@ -2,6 +2,7 @@
 using CatalogService.Application.Categories.Queries;
 using CatalogService.Application.DTOs;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [Route("[controller]")]
@@ -16,6 +17,7 @@ public class CategoriesController : ControllerBase
         Ok(await _mediator.Send(new GetAllCategoriesQuery()));
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<CategoryDto>> Post([FromBody] CreateCategoryCommand command) =>
         Ok(await _mediator.Send(command));
 }

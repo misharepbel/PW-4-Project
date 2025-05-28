@@ -2,6 +2,7 @@
 using CatalogService.Application.Products.Commands;
 using CatalogService.Application.Products.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogService.API.Controllers
@@ -22,10 +23,12 @@ namespace CatalogService.API.Controllers
             Ok(await _mediator.Send(new GetProductByIdQuery(id)));
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductDto>> Post([FromBody] CreateProductCommand command) =>
             Ok(await _mediator.Send(command));
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductDto>> Put(int id, [FromBody] UpdateProductCommand command)
         {
             if (id != command.Id) return BadRequest("Id mismatch");
@@ -33,6 +36,7 @@ namespace CatalogService.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _mediator.Send(new DeleteProductCommand(id));
