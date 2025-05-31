@@ -34,9 +34,9 @@ jobs:
       - name: Build and push container image to registry
         uses: azure/container-apps-deploy-action@v2
         with:
-          appSourcePath: ${{ github.workspace }}
-          _dockerfilePathKey_: _dockerfilePath_
-          registryUrl: 
+          appSourcePath: ${{ github.workspace }}/ApiGateway
+          _dockerfilePathKey_: ApiGateway/Dockerfile
+          registryUrl: teashopacr.azurecr.io
           registryUsername: ${{ secrets.TEASHOPAPITEST_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.TEASHOPAPITEST_REGISTRY_PASSWORD }}
           containerAppName: teashop-api-test
