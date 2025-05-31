@@ -1,0 +1,10 @@
+{
+  "name": "TeaShop Dev",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "apigateway",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "postCreateCommand": "dotnet restore",
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  }
+}
