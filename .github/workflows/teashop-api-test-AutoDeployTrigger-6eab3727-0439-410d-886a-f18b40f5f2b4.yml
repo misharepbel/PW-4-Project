@@ -1,24 +1,20 @@
 name: Trigger auto deployment for teashop-api-test
 
-# When this action will be executed
 on:
-  # Automatically trigger it when detected changes in repo
   push:
     branches: 
       [ azure-test ]
     paths:
     - '**'
     - '.github/workflows/teashop-api-test-AutoDeployTrigger-6eab3727-0439-410d-886a-f18b40f5f2b4.yml'
-
-  # Allow manual trigger 
-  workflow_dispatch:      
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions: 
-      id-token: write #This is required for requesting the OIDC JWT Token
-      contents: read #Required when GH token is used to authenticate with private repo
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout to the branch
@@ -34,15 +30,11 @@ jobs:
       - name: Build and push container image to ACR
         uses: azure/container-apps-deploy-action@v2
         with:
-          appSourcePath: ${{ github.workspace }}/ApiGateway
-          dockerfilePath: ApiGateway/Dockerfile
-          containerAppBuildMethod: dockerfile
+          appSourcePath: ./ApiGateway
+          dockerfilePath: ./ApiGateway/Dockerfile
           registryUrl: teashopacr.azurecr.io
           registryUsername: ${{ secrets.TEASHOPAPITEST_REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.TEASHOPAPITEST_REGISTRY_PASSWORD }}
           containerAppName: teashop-api-test
           resourceGroup: tea-rg
           imageToBuild: teashopacr.azurecr.io/teashop-api-test:${{ github.sha }}
-
-
-
