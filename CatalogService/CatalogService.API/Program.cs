@@ -59,9 +59,15 @@ namespace CatalogService.API
 
             builder.Services.AddAuthentication("Bearer").AddJwtBearer("Bearer", options =>
             {
-                var publicKey = File.ReadAllText("/app/rsa/public.pem");
+                var publicKeyEnv = Environment.GetEnvironmentVariable("JWT_PUBLIC_KEY");
+
+                if (string.IsNullOrWhiteSpace(publicKeyEnv))
+                    throw new InvalidOperationException("JWT_PUBLIC_KEY is not set.");
+
+                publicKeyEnv = publicKeyEnv.Replace("\\n", "\n");
+
                 var rsa = RSA.Create();
-                rsa.ImportFromPem(publicKey.ToCharArray());
+                rsa.ImportFromPem(publicKeyEnv.ToCharArray());
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
