@@ -1,4 +1,4 @@
-﻿namespace CatalogService.Models;
+﻿namespace CatalogService.Domain.Entities;
 
 public class Product : BaseModel
 {
@@ -9,5 +9,7 @@ public class Product : BaseModel
     public int Stock { get; set; }
     public string Country { get; set; } = default!;
     public string SKU { get; set; } = default!;
+
+    public int CategoryId { get; set; }
     public Category Category { get; set; } = default!;
 }
