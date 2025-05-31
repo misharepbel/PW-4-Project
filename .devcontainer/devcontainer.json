@@ -1,10 +1,15 @@
 {
   "name": "TeaShop Dev",
-  "dockerComposeFile": "docker-compose.yml",
+  "dockerComposeFile": "../docker-compose.yml",
   "service": "apigateway",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "postCreateCommand": "dotnet restore",
+  "workspaceFolder": "/workspace",
   "settings": {
     "terminal.integrated.defaultProfile.linux": "bash"
-  }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:1": {}
+  },
+  "postCreateCommand": "sleep 5",
+  "mounts": ["source=docker,target=/var/lib/docker,type=volume"],
+  "runServices": ["apigateway", "userservice", "orderservice", "catalogservice", "sqlserver"]
 }
