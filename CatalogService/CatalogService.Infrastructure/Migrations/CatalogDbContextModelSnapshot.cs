@@ -57,6 +57,7 @@ namespace CatalogService.Infrastructure.Migrations
             modelBuilder.Entity("CatalogService.Domain.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("CategoryId")
