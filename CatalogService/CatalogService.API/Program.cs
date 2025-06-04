@@ -1,7 +1,7 @@
 ﻿
 using CatalogService.Application.Extensions;
 using CatalogService.Infrastructure.Extensions;
-using CatalogService.Infrastructure.Persistance;
+using CatalogService.Infrastructure.Persistence;
 using CatalogService.Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

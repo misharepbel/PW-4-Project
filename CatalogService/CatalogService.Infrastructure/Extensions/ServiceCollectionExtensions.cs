@@ -1,5 +1,5 @@
 ﻿using CatalogService.Domain.Interfaces;
-using CatalogService.Infrastructure.Persistance;
+using CatalogService.Infrastructure.Persistence;
 using CatalogService.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
