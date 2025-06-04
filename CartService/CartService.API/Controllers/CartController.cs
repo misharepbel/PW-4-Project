@@ -4,6 +4,7 @@ using CartService.Application.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CartService.API.Controllers;
 
@@ -14,28 +15,30 @@ public class CartController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 
-    [HttpGet("{userId}")]
-    public async Task<ActionResult<CartDto?>> Get(Guid userId)
-        => Ok(await _mediator.Send(new GetCartQuery(userId)));
+    private Guid CurrentUserId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-    [HttpPost("{userId}/items")]
-    public async Task<IActionResult> AddItem(Guid userId, [FromBody] CartItemDto item)
+    [HttpGet]
+    public async Task<ActionResult<CartDto?>> Get()
+        => Ok(await _mediator.Send(new GetCartQuery(CurrentUserId())));
+
+    [HttpPost("items")]
+    public async Task<IActionResult> AddItem([FromBody] CartItemDto item)
     {
-        await _mediator.Send(new AddItemCommand(userId, item));
+        await _mediator.Send(new AddItemCommand(CurrentUserId(), item));
         return Ok();
     }
 
-    [HttpDelete("{userId}/items/{productId}")]
-    public async Task<IActionResult> RemoveItem(Guid userId, Guid productId)
+    [HttpDelete("items/{productId}")]
+    public async Task<IActionResult> RemoveItem(Guid productId)
     {
-        await _mediator.Send(new RemoveItemCommand(userId, productId));
+        await _mediator.Send(new RemoveItemCommand(CurrentUserId(), productId));
         return NoContent();
     }
 
-    [HttpDelete("{userId}")]
-    public async Task<IActionResult> Clear(Guid userId)
+    [HttpDelete]
+    public async Task<IActionResult> Clear()
     {
-        await _mediator.Send(new ClearCartCommand(userId));
+        await _mediator.Send(new ClearCartCommand(CurrentUserId()));
         return NoContent();
     }
 }
