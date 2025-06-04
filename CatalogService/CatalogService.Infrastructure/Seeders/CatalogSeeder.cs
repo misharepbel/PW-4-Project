@@ -1,5 +1,5 @@
 ﻿using CatalogService.Domain.Entities;
-using CatalogService.Infrastructure.Persistance;
+using CatalogService.Infrastructure.Persistence;
 
 namespace CatalogService.Infrastructure.Seeders;
 

@@ -1,7 +1,7 @@
 ﻿using CatalogService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace CatalogService.Infrastructure.Persistance
+namespace CatalogService.Infrastructure.Persistence
 {
     public class CatalogDbContext : DbContext, ICatalogDbContext
     {
