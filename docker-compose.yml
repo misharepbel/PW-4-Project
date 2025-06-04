@@ -46,6 +46,19 @@ services:
     volumes:
       - ./rsa/public.pem:/app/rsa/public.pem:ro
 
+  cartservice:
+    build:
+      context: ./CartService
+      dockerfile: CartService.API/Dockerfile
+    environment:
+      ConnectionStrings__Default: "Server=sqlserver;Database=CartDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+    expose:
+      - "8080"
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./rsa/public.pem:/app/rsa/public.pem:ro
+
 
   apigateway:
     build:
@@ -59,6 +72,8 @@ services:
       orderservice:
          condition: service_started
       catalogservice:
+         condition: service_started
+      cartservice:
          condition: service_started
 
       
