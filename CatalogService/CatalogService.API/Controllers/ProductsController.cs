@@ -19,7 +19,7 @@ namespace CatalogService.API.Controllers
             Ok(await _mediator.Send(new GetAllProductsQuery()));
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> Get(int id) =>
+        public async Task<ActionResult<ProductDto>> Get(Guid id) =>
             Ok(await _mediator.Send(new GetProductByIdQuery(id)));
 
         [HttpPost]
@@ -29,7 +29,7 @@ namespace CatalogService.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<ProductDto>> Put(int id, [FromBody] UpdateProductCommand command)
+        public async Task<ActionResult<ProductDto>> Put(Guid id, [FromBody] UpdateProductCommand command)
         {
             if (id != command.Id) return BadRequest("Id mismatch");
             return Ok(await _mediator.Send(command));
@@ -37,7 +37,7 @@ namespace CatalogService.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _mediator.Send(new DeleteProductCommand(id));
             return result ? Ok() : NotFound();
