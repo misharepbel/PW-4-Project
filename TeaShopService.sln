@@ -18,6 +18,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderService.Infrastructure", "OrderService\OrderService.Infrastructure\OrderService.Infrastructure.csproj", "{0985353F-01F5-4A74-8234-6E72F0826A89}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UserService", "UserService", "{A4A443F7-A60B-4A14-A62C-65B72BD53E2A}"
+	ProjectSection(SolutionItems) = preProject
+		UserService\UserService.API\Dockerfile = UserService\UserService.API\Dockerfile
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.API", "UserService\UserService.API\UserService.API.csproj", "{B674F543-377D-48AF-8C72-9FFED9F064F0}"
 EndProject
@@ -35,13 +38,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.IntegrationTest
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CatalogService", "CatalogService", "{236C575D-E7E8-40CC-89EE-3AF909DD14D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService.API", "CatalogService\CatalogService.API\CatalogService.API.csproj", "{AA6D526B-B0B7-48AC-8C16-BC3A5387494D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatalogService.API", "CatalogService\CatalogService.API\CatalogService.API.csproj", "{AA6D526B-B0B7-48AC-8C16-BC3A5387494D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService.Application", "CatalogService\CatalogService.Application\CatalogService.Application.csproj", "{D51B6608-7E6E-45DA-B807-A5A495189F03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatalogService.Application", "CatalogService\CatalogService.Application\CatalogService.Application.csproj", "{D51B6608-7E6E-45DA-B807-A5A495189F03}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService.Domain", "CatalogService\CatalogService.Domain\CatalogService.Domain.csproj", "{DDFE1330-5CD8-44B5-8229-3DEC6CC159D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatalogService.Domain", "CatalogService\CatalogService.Domain\CatalogService.Domain.csproj", "{DDFE1330-5CD8-44B5-8229-3DEC6CC159D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogService.Infrastructure", "CatalogService\CatalogService.Infrastructure\CatalogService.Infrastructure.csproj", "{5BDFF551-E53E-4961-86AD-AA8C585D00A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatalogService.Infrastructure", "CatalogService\CatalogService.Infrastructure\CatalogService.Infrastructure.csproj", "{5BDFF551-E53E-4961-86AD-AA8C585D00A1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CartService", "CartService", "{6386C570-BFAD-4A45-B8EF-6DFB19FDDA2D}"
 EndProject

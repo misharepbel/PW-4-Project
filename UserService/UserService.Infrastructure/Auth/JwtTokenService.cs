@@ -14,11 +14,18 @@ public class JwtTokenService : IJwtTokenService
 
     public JwtTokenService(IConfiguration config)
     {
-        var privateKey = File.ReadAllText("rsa/private.pem");
+        var privateKeyPem = Environment.GetEnvironmentVariable("JWT_PRIVATE_KEY");
+
+        if (string.IsNullOrWhiteSpace(privateKeyPem))
+            throw new InvalidOperationException("JWT_PRIVATE_KEY is not set.");
+
+        privateKeyPem = privateKeyPem.Replace("\\n", "\n");
+
         var rsa = RSA.Create();
-        rsa.ImportFromPem(privateKey.ToCharArray());
+        rsa.ImportFromPem(privateKeyPem.ToCharArray());
 
         _key = new RsaSecurityKey(rsa);
+
     }
 
     public string GenerateToken(User user)
