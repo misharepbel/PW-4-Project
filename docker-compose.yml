@@ -64,6 +64,8 @@ services:
       dockerfile: CatalogService.API/Dockerfile
     environment:
       ConnectionStrings__Default: "Server=sqlserver;Database=CatalogDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+      Kafka__BootstrapServers: "kafka:9092"
+      Kafka__ProductCacheTopic: "product-cache"
     expose:
       - "8080"
     depends_on:
@@ -78,6 +80,8 @@ services:
       dockerfile: CartService.API/Dockerfile
     environment:
       ConnectionStrings__Redis: "redis"
+      Kafka__BootstrapServers: "kafka:9092"
+      Kafka__ProductCacheTopic: "product-cache"
     expose:
       - "8080"
     depends_on:

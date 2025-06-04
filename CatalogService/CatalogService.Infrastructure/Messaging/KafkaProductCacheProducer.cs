@@ -12,7 +12,7 @@ public class KafkaProductCacheProducer : IProductCacheProducer, IDisposable
 
     public KafkaProductCacheProducer(IConfiguration configuration)
     {
-        var bootstrap = configuration["Kafka:BootstrapServers"] ?? "localhost:9092";
+        var bootstrap = configuration["Kafka:BootstrapServers"] ?? "kafka:9092";
         _topic = configuration["Kafka:ProductCacheTopic"] ?? "product-cache";
         var config = new ProducerConfig { BootstrapServers = bootstrap };
         _producer = new ProducerBuilder<Null, string>(config).Build();
