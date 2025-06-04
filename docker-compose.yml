@@ -87,6 +87,7 @@ services:
     depends_on:
       - redis
       - kafka
+      - catalogservice
     volumes:
       - ./rsa/public.pem:/app/rsa/public.pem:ro
 

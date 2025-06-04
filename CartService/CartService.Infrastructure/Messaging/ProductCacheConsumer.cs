@@ -10,53 +10,68 @@ namespace CartService.Infrastructure.Messaging;
 
 public class ProductCacheConsumer : BackgroundService
 {
-    private readonly IConsumer<Ignore, string> _consumer;
+    private IConsumer<Ignore, string>? _consumer;
     private readonly string _topic;
     private readonly IProductCache _cache;
     private readonly ILogger<ProductCacheConsumer> _logger;
+    private readonly IConfiguration _configuration;
 
     public ProductCacheConsumer(IConfiguration configuration, IProductCache cache, ILogger<ProductCacheConsumer> logger)
     {
-        var config = new ConsumerConfig
-        {
-            GroupId = "cartservice",
-            BootstrapServers = configuration["Kafka:BootstrapServers"] ?? "kafka:9092",
-            AutoOffsetReset = AutoOffsetReset.Earliest
-        };
-        _topic = configuration["Kafka:ProductCacheTopic"] ?? "product-cache";
-        _consumer = new ConsumerBuilder<Ignore, string>(config).Build();
+        _configuration = configuration;
         _cache = cache;
         _logger = logger;
+        _topic = configuration["Kafka:ProductCacheTopic"] ?? "product-cache";
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _consumer.Subscribe(_topic);
-        while (!stoppingToken.IsCancellationRequested)
+        var config = new ConsumerConfig
         {
-            try
-            {
-                var result = _consumer.Consume(stoppingToken);
-                var cacheEvent = JsonSerializer.Deserialize<ProductCacheEvent>(result.Message.Value);
-                if (cacheEvent != null)
-                    _cache.Set(cacheEvent);
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error consuming product cache");
-            }
-        }
-    }
+            GroupId = "cartservice",
+            BootstrapServers = _configuration["Kafka:BootstrapServers"] ?? "kafka:9092",
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnableAutoCommit = true
+        };
 
-    public override void Dispose()
-    {
-        _consumer.Close();
-        _consumer.Dispose();
-        base.Dispose();
+        _ = Task.Run(async () =>
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
+                {
+                    _logger.LogInformation("Attempting to connect to Kafka broker at {Broker}...", config.BootstrapServers);
+                    _consumer = new ConsumerBuilder<Ignore, string>(config).Build();
+                    _consumer.Subscribe(_topic);
+
+                    _logger.LogInformation("Kafka connection successful. Subscribed to topic '{Topic}'", _topic);
+
+                    while (!stoppingToken.IsCancellationRequested)
+                    {
+                        var result = _consumer.Consume(stoppingToken);
+                        var cacheEvent = JsonSerializer.Deserialize<ProductCacheEvent>(result.Message.Value);
+                        if (cacheEvent != null)
+                        {
+                            _cache.Set(cacheEvent);
+                            _logger.LogInformation("Cached product update!@!@!");
+                        }
+                    }
+                }
+                catch (ConsumeException ex)
+                {
+                    _logger.LogError(ex, "Kafka consume exception");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Kafka error. Retrying in 5 seconds...");
+                    await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                }
+                finally
+                {
+                    _consumer?.Close();
+                    _consumer?.Dispose();
+                }
+            }
+        }, stoppingToken);
     }
 }
-

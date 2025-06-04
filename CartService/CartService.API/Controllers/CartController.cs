@@ -1,6 +1,7 @@
 using CartService.Application.Commands;
 using CartService.Application.DTOs;
 using CartService.Application.Queries;
+using CartService.Application.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,13 @@ public class CartController(IMediator mediator) : ControllerBase
     private readonly IMediator _mediator = mediator;
 
     private Guid CurrentUserId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+    [HttpGet("cached")]
+    public IActionResult GetCachedProducts([FromServices] IProductCache cache)
+    {
+        var cachedItems = cache;
+        return Ok(cachedItems);
+    }
 
     [HttpGet]
     public async Task<ActionResult<CartDto?>> Get()
