@@ -107,6 +107,7 @@ namespace ApiGateway
                 ui.SwaggerEndpoint("/swagger/OrderServiceCluster/swagger.json", "OrderService V1");
                 ui.SwaggerEndpoint("/swagger/UserServiceCluster/swagger.json", "UserService V1");
                 ui.SwaggerEndpoint("/swagger/CatalogServiceCluster/swagger.json", "CatalogService V1");
+                ui.SwaggerEndpoint("/swagger/CartServiceCluster/swagger.json", "CartService V1");
 
 
                 ui.DefaultModelsExpandDepth(-1);
