@@ -55,7 +55,7 @@ services:
       context: ./CartService
       dockerfile: CartService.API/Dockerfile
     environment:
-      ConnectionStrings__Redis: "redis:6379"
+      ConnectionStrings__Redis: "redis"
     expose:
       - "8080"
     depends_on:

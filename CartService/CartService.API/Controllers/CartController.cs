@@ -21,14 +21,14 @@ public class CartController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<CartDto?>> Get()
         => Ok(await _mediator.Send(new GetCartQuery(CurrentUserId())));
 
-    [HttpPost("items")]
+    [HttpPost("item")]
     public async Task<IActionResult> AddItem([FromBody] CartItemDto item)
     {
         await _mediator.Send(new AddItemCommand(CurrentUserId(), item));
         return Ok();
     }
 
-    [HttpDelete("items/{productId}")]
+    [HttpDelete("item/{productId}")]
     public async Task<IActionResult> RemoveItem(Guid productId)
     {
         await _mediator.Send(new RemoveItemCommand(CurrentUserId(), productId));
