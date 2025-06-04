@@ -1,6 +1,6 @@
 ﻿using CatalogService.Domain.Entities;
 using CatalogService.Domain.Interfaces;
-using CatalogService.Infrastructure.Persistance;
+using CatalogService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace CatalogService.Infrastructure.Repositories;
