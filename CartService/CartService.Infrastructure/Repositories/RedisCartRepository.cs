@@ -1,27 +1,31 @@
 using CartService.Domain.Entities;
 using CartService.Domain.Interfaces;
-using CartService.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
+using System.Text.Json;
 
 namespace CartService.Infrastructure.Repositories;
 
-public class CartRepository : ICartRepository
+public class RedisCartRepository : ICartRepository
 {
-    private readonly CartDbContext _context;
-    public CartRepository(CartDbContext context) => _context = context;
+    private readonly IDatabase _db;
+
+    public RedisCartRepository(IConnectionMultiplexer connection)
+    {
+        _db = connection.GetDatabase();
+    }
+
+    private static string GetKey(Guid userId) => $"cart:{userId}";
 
     public async Task<Cart?> GetByUserIdAsync(Guid userId)
-        => await _context.Carts.Include(c => c.Items).FirstOrDefaultAsync(c => c.UserId == userId);
+    {
+        var value = await _db.StringGetAsync(GetKey(userId));
+        if (value.IsNullOrEmpty) return null;
+        return JsonSerializer.Deserialize<Cart>(value!);
+    }
 
     public async Task AddOrUpdateItemAsync(Guid userId, CartItem item)
     {
-        var cart = await GetByUserIdAsync(userId);
-        if (cart == null)
-        {
-            cart = new Cart { UserId = userId, Items = new List<CartItem>() };
-            _context.Carts.Add(cart);
-        }
-
+        var cart = await GetByUserIdAsync(userId) ?? new Cart { UserId = userId, Items = new List<CartItem>() };
         var existing = cart.Items.FirstOrDefault(i => i.ProductId == item.ProductId);
         if (existing == null)
             cart.Items.Add(item);
@@ -31,8 +35,7 @@ public class CartRepository : ICartRepository
             existing.UnitPrice = item.UnitPrice;
             existing.ProductName = item.ProductName;
         }
-
-        await _context.SaveChangesAsync();
+        await _db.StringSetAsync(GetKey(userId), JsonSerializer.Serialize(cart));
     }
 
     public async Task RemoveItemAsync(Guid userId, Guid productId)
@@ -43,17 +46,14 @@ public class CartRepository : ICartRepository
         if (item != null)
         {
             cart.Items.Remove(item);
-            await _context.SaveChangesAsync();
+            await _db.StringSetAsync(GetKey(userId), JsonSerializer.Serialize(cart));
         }
     }
 
     public async Task ClearAsync(Guid userId)
     {
-        var cart = await GetByUserIdAsync(userId);
-        if (cart == null) return;
-        cart.Items.Clear();
-        await _context.SaveChangesAsync();
+        await _db.KeyDeleteAsync(GetKey(userId));
     }
 
-    public Task SaveChangesAsync() => _context.SaveChangesAsync();
+    public Task SaveChangesAsync() => Task.CompletedTask;
 }

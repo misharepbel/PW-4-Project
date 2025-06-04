@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CartService.API.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("")]
 [Authorize]
 public class CartController(IMediator mediator) : ControllerBase
 {

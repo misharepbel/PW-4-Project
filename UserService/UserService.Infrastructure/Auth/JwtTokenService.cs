@@ -39,7 +39,7 @@ public class JwtTokenService : IJwtTokenService
             issuer: "UserService",
             audience: "TeaShop",
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(3), // change later
+            expires: DateTime.UtcNow.AddMinutes(60), // change later
             signingCredentials: creds
         );
 

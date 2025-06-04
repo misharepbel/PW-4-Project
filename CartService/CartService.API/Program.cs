@@ -1,9 +1,7 @@
 using CartService.Application.Extensions;
 using CartService.Infrastructure.Extensions;
-using CartService.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Security.Cryptography;
 
@@ -71,11 +69,6 @@ namespace CartService.API
 
             var app = builder.Build();
 
-            using (var scope = app.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<CartDbContext>();
-                await context.Database.MigrateAsync();
-            }
 
             app.UseSwagger();
             app.UseSwaggerUI();

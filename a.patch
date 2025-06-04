@@ -1,0 +1,398 @@
+diff --git a/CartService/CartService.API/CartService.API.csproj b/CartService/CartService.API/CartService.API.csproj
+index 60eca7dfe825732681dd1bc86ff9177deeace601..25e9b0636c2054507966a355737c31cfb9b64975 100644
+--- a/CartService/CartService.API/CartService.API.csproj
++++ b/CartService/CartService.API/CartService.API.csproj
+@@ -1,21 +1,17 @@
+ <Project Sdk="Microsoft.NET.Sdk.Web">
+   <PropertyGroup>
+     <TargetFramework>net8.0</TargetFramework>
+     <Nullable>enable</Nullable>
+     <ImplicitUsings>enable</ImplicitUsings>
+     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+     <DockerfileContext>..\..</DockerfileContext>
+   </PropertyGroup>
+   <ItemGroup>
+     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.16" />
+-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
+-      <PrivateAssets>all</PrivateAssets>
+-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+-    </PackageReference>
+     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+   </ItemGroup>
+   <ItemGroup>
+     <ProjectReference Include="..\CartService.Application\CartService.Application.csproj" />
+     <ProjectReference Include="..\CartService.Infrastructure\CartService.Infrastructure.csproj" />
+   </ItemGroup>
+ </Project>
+diff --git a/CartService/CartService.API/Program.cs b/CartService/CartService.API/Program.cs
+index 6020d6338a453cbc51ae96af36a47b7b4eb58a73..715d1ec91120444c8401a5cf132d8f39839d64dc 100644
+--- a/CartService/CartService.API/Program.cs
++++ b/CartService/CartService.API/Program.cs
+@@ -1,31 +1,29 @@
+ using CartService.Application.Extensions;
+ using CartService.Infrastructure.Extensions;
+-using CartService.Infrastructure.Persistence;
+ using Microsoft.AspNetCore.Authentication.JwtBearer;
+ using Microsoft.IdentityModel.Tokens;
+-using Microsoft.EntityFrameworkCore;
+ using Microsoft.OpenApi.Models;
+ using System.Security.Cryptography;
+ 
+ namespace CartService.API
+ {
+     public class Program
+     {
+         public static async Task Main(string[] args)
+         {
+             var builder = WebApplication.CreateBuilder(args);
+ 
+             builder.Services.AddApplicationServices();
+             builder.Services.AddInfrastructureServices(builder.Configuration);
+ 
+             builder.Services.AddControllers();
+             builder.Services.AddEndpointsApiExplorer();
+             builder.Services.AddSwaggerGen(options =>
+             {
+                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "CartService", Version = "v1" });
+                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                 {
+                     Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer eyJhbGci...\"",
+                     Name = "Authorization",
+                     In = ParameterLocation.Header,
+                     Type = SecuritySchemeType.Http,
+@@ -49,45 +47,40 @@ namespace CartService.API
+             });
+ 
+             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                 .AddJwtBearer(options =>
+                 {
+                     var publicKey = File.ReadAllText("/app/rsa/public.pem");
+                     var rsa = RSA.Create();
+                     rsa.ImportFromPem(publicKey.ToCharArray());
+ 
+                     options.TokenValidationParameters = new TokenValidationParameters
+                     {
+                         ValidateIssuer = true,
+                         ValidateAudience = true,
+                         ValidateLifetime = true,
+                         ClockSkew = TimeSpan.Zero,
+                         ValidIssuer = "UserService",
+                         ValidAudience = "TeaShop",
+                         IssuerSigningKey = new RsaSecurityKey(rsa)
+                     };
+                 });
+ 
+             builder.Services.AddAuthorization();
+ 
+             var app = builder.Build();
+ 
+-            using (var scope = app.Services.CreateScope())
+-            {
+-                var context = scope.ServiceProvider.GetRequiredService<CartDbContext>();
+-                await context.Database.MigrateAsync();
+-            }
+ 
+             app.UseSwagger();
+             app.UseSwaggerUI();
+ 
+             app.UseHttpsRedirection();
+ 
+             app.UseAuthentication();
+             app.UseAuthorization();
+ 
+             app.MapControllers();
+ 
+             await app.RunAsync();
+         }
+     }
+ }
+diff --git a/CartService/CartService.Application/CartService.Application.csproj b/CartService/CartService.Application/CartService.Application.csproj
+index 7a5763de047ea1d948121d05e9995c7e5b5d6546..58e388b343d182ed1e4f63b73ed950761f9e61aa 100644
+--- a/CartService/CartService.Application/CartService.Application.csproj
++++ b/CartService/CartService.Application/CartService.Application.csproj
+@@ -1,15 +1,14 @@
+ <Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+     <TargetFramework>net8.0</TargetFramework>
+     <ImplicitUsings>enable</ImplicitUsings>
+     <Nullable>enable</Nullable>
+   </PropertyGroup>
+   <ItemGroup>
+     <PackageReference Include="AutoMapper" Version="14.0.0" />
+     <PackageReference Include="MediatR" Version="12.5.0" />
+-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
+   </ItemGroup>
+   <ItemGroup>
+     <ProjectReference Include="..\CartService.Domain\CartService.Domain.csproj" />
+   </ItemGroup>
+ </Project>
+diff --git a/CartService/CartService.Application/Interfaces/ICartDbContext.cs b/CartService/CartService.Application/Interfaces/ICartDbContext.cs
+deleted file mode 100644
+index 60dfd42efb5d4aa39fac579c9ff0f6c5d1d92699..0000000000000000000000000000000000000000
+--- a/CartService/CartService.Application/Interfaces/ICartDbContext.cs
++++ /dev/null
+@@ -1,11 +0,0 @@
+-using CartService.Domain.Entities;
+-using Microsoft.EntityFrameworkCore;
+-
+-namespace CartService.Application.Interfaces;
+-
+-public interface ICartDbContext
+-{
+-    DbSet<Cart> Carts { get; }
+-    DbSet<CartItem> CartItems { get; }
+-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+-}
+diff --git a/CartService/CartService.Infrastructure/CartService.Infrastructure.csproj b/CartService/CartService.Infrastructure/CartService.Infrastructure.csproj
+index ecf03a110ca728b6e08e2a2e945eebe79abf58ff..623aeae1d2238fa899534f2052c6954422579167 100644
+--- a/CartService/CartService.Infrastructure/CartService.Infrastructure.csproj
++++ b/CartService/CartService.Infrastructure/CartService.Infrastructure.csproj
+@@ -1,15 +1,14 @@
+ <Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+     <TargetFramework>net8.0</TargetFramework>
+     <ImplicitUsings>enable</ImplicitUsings>
+     <Nullable>enable</Nullable>
+   </PropertyGroup>
+   <ItemGroup>
+-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
+-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.5" />
++    <PackageReference Include="StackExchange.Redis" Version="2.7.4" />
+   </ItemGroup>
+   <ItemGroup>
+     <ProjectReference Include="..\CartService.Application\CartService.Application.csproj" />
+     <ProjectReference Include="..\CartService.Domain\CartService.Domain.csproj" />
+   </ItemGroup>
+ </Project>
+diff --git a/CartService/CartService.Infrastructure/Extensions/ServiceCollectionExtensions.cs b/CartService/CartService.Infrastructure/Extensions/ServiceCollectionExtensions.cs
+index fe8054526562cd069fd2762cc1aa0df28726e888..14f05c162d6c9d54d5203cf9479154ea0291e3a6 100644
+--- a/CartService/CartService.Infrastructure/Extensions/ServiceCollectionExtensions.cs
++++ b/CartService/CartService.Infrastructure/Extensions/ServiceCollectionExtensions.cs
+@@ -1,22 +1,19 @@
+-using CartService.Application.Interfaces;
+ using CartService.Domain.Interfaces;
+-using CartService.Infrastructure.Persistence;
+ using CartService.Infrastructure.Repositories;
+-using Microsoft.EntityFrameworkCore;
+ using Microsoft.Extensions.Configuration;
+ using Microsoft.Extensions.DependencyInjection;
++using StackExchange.Redis;
+ 
+ namespace CartService.Infrastructure.Extensions;
+ 
+ public static class ServiceCollectionExtensions
+ {
+     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+     {
+-        services.AddDbContext<CartDbContext>(options =>
+-            options.UseSqlServer(configuration.GetConnectionString("Default")));
++        services.AddSingleton<IConnectionMultiplexer>(_ =>
++            ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")));
+ 
+-        services.AddScoped<ICartDbContext>(provider => provider.GetRequiredService<CartDbContext>());
+-        services.AddScoped<ICartRepository, CartRepository>();
++        services.AddScoped<ICartRepository, RedisCartRepository>();
+         return services;
+     }
+ }
+diff --git a/CartService/CartService.Infrastructure/Persistence/CartDbContext.cs b/CartService/CartService.Infrastructure/Persistence/CartDbContext.cs
+deleted file mode 100644
+index 9903238267e4ae98d5429dc366709d73f64d2a73..0000000000000000000000000000000000000000
+--- a/CartService/CartService.Infrastructure/Persistence/CartDbContext.cs
++++ /dev/null
+@@ -1,13 +0,0 @@
+-using CartService.Domain.Entities;
+-using Microsoft.EntityFrameworkCore;
+-using CartService.Application.Interfaces;
+-
+-namespace CartService.Infrastructure.Persistence;
+-
+-public class CartDbContext : DbContext, ICartDbContext
+-{
+-    public CartDbContext(DbContextOptions<CartDbContext> options) : base(options) { }
+-
+-    public DbSet<Cart> Carts => Set<Cart>();
+-    public DbSet<CartItem> CartItems => Set<CartItem>();
+-}
+diff --git a/CartService/CartService.Infrastructure/Repositories/CartRepository.cs b/CartService/CartService.Infrastructure/Repositories/RedisCartRepository.cs
+similarity index 52%
+rename from CartService/CartService.Infrastructure/Repositories/CartRepository.cs
+rename to CartService/CartService.Infrastructure/Repositories/RedisCartRepository.cs
+index a3a49ed583eda3c96a8e5f45de7b3d0aa9ea1416..731e3e41203e081c1ee7c99eb43913945bceecab 100644
+--- a/CartService/CartService.Infrastructure/Repositories/CartRepository.cs
++++ b/CartService/CartService.Infrastructure/Repositories/RedisCartRepository.cs
+@@ -1,59 +1,59 @@
+ using CartService.Domain.Entities;
+ using CartService.Domain.Interfaces;
+-using CartService.Infrastructure.Persistence;
+-using Microsoft.EntityFrameworkCore;
++using StackExchange.Redis;
++using System.Text.Json;
+ 
+ namespace CartService.Infrastructure.Repositories;
+ 
+-public class CartRepository : ICartRepository
++public class RedisCartRepository : ICartRepository
+ {
+-    private readonly CartDbContext _context;
+-    public CartRepository(CartDbContext context) => _context = context;
++    private readonly IDatabase _db;
++
++    public RedisCartRepository(IConnectionMultiplexer connection)
++    {
++        _db = connection.GetDatabase();
++    }
++
++    private static string GetKey(Guid userId) => $"cart:{userId}";
+ 
+     public async Task<Cart?> GetByUserIdAsync(Guid userId)
+-        => await _context.Carts.Include(c => c.Items).FirstOrDefaultAsync(c => c.UserId == userId);
++    {
++        var value = await _db.StringGetAsync(GetKey(userId));
++        if (value.IsNullOrEmpty) return null;
++        return JsonSerializer.Deserialize<Cart>(value!);
++    }
+ 
+     public async Task AddOrUpdateItemAsync(Guid userId, CartItem item)
+     {
+-        var cart = await GetByUserIdAsync(userId);
+-        if (cart == null)
+-        {
+-            cart = new Cart { UserId = userId, Items = new List<CartItem>() };
+-            _context.Carts.Add(cart);
+-        }
+-
++        var cart = await GetByUserIdAsync(userId) ?? new Cart { UserId = userId, Items = new List<CartItem>() };
+         var existing = cart.Items.FirstOrDefault(i => i.ProductId == item.ProductId);
+         if (existing == null)
+             cart.Items.Add(item);
+         else
+         {
+             existing.Quantity += item.Quantity;
+             existing.UnitPrice = item.UnitPrice;
+             existing.ProductName = item.ProductName;
+         }
+-
+-        await _context.SaveChangesAsync();
++        await _db.StringSetAsync(GetKey(userId), JsonSerializer.Serialize(cart));
+     }
+ 
+     public async Task RemoveItemAsync(Guid userId, Guid productId)
+     {
+         var cart = await GetByUserIdAsync(userId);
+         if (cart == null) return;
+         var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
+         if (item != null)
+         {
+             cart.Items.Remove(item);
+-            await _context.SaveChangesAsync();
++            await _db.StringSetAsync(GetKey(userId), JsonSerializer.Serialize(cart));
+         }
+     }
+ 
+     public async Task ClearAsync(Guid userId)
+     {
+-        var cart = await GetByUserIdAsync(userId);
+-        if (cart == null) return;
+-        cart.Items.Clear();
+-        await _context.SaveChangesAsync();
++        await _db.KeyDeleteAsync(GetKey(userId));
+     }
+ 
+-    public Task SaveChangesAsync() => _context.SaveChangesAsync();
++    public Task SaveChangesAsync() => Task.CompletedTask;
+ }
+diff --git a/docker-compose.yml b/docker-compose.yml
+index b11d94e4c5a885d0b742d6edd4cc9c869ea2811b..324950d84187f2f7ff13636a53d301056b00a0e1 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -1,83 +1,87 @@
+ ﻿version: '3.4'
+ 
+ services:
++  redis:
++    image: redis:latest
++    ports:
++      - "6379:6379"
+   sqlserver:
+     image: mcr.microsoft.com/mssql/server:2022-latest
+     environment:
+         SA_PASSWORD: MyPassw0rd!
+         ACCEPT_EULA: "Y"
+     ports:
+         - "1433:1433"
+   orderservice:
+     build:
+       context: ./OrderService
+       dockerfile: OrderService/Dockerfile
+     environment:
+       #extract the password to a .env later
+       ConnectionStrings__Default: "Server=sqlserver;Database=OrdersDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+     expose:
+       - "8080"
+     depends_on:
+       - sqlserver
+ 
+   userservice:
+       build:
+         context: ./UserService
+         dockerfile: UserService.API/Dockerfile
+       environment:
+         ConnectionStrings__Default: "Server=sqlserver;Database=UsersDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+       expose:
+         - "8080"
+       depends_on:
+         - sqlserver
+       volumes:
+         - ./rsa:/app/rsa:ro
+ 
+   catalogservice:
+     build:
+       context: ./CatalogService
+       dockerfile: CatalogService.API/Dockerfile
+     environment:
+       ConnectionStrings__Default: "Server=sqlserver;Database=CatalogDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+     expose:
+       - "8080"
+     depends_on:
+       - sqlserver
+     volumes:
+       - ./rsa/public.pem:/app/rsa/public.pem:ro
+ 
+   cartservice:
+     build:
+       context: ./CartService
+       dockerfile: CartService.API/Dockerfile
+     environment:
+-      ConnectionStrings__Default: "Server=sqlserver;Database=CartDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
++      ConnectionStrings__Redis: "redis:6379"
+     expose:
+       - "8080"
+     depends_on:
+-      - sqlserver
++      - redis
+     volumes:
+       - ./rsa/public.pem:/app/rsa/public.pem:ro
+ 
+ 
+   apigateway:
+     build:
+       context: .
+       dockerfile: ApiGateway/Dockerfile
+     ports:
+       - "8080:8080"
+     depends_on:
+       userservice:
+          condition: service_started
+       orderservice:
+          condition: service_started
+       catalogservice:
+          condition: service_started
+       cartservice:
+          condition: service_started
+ 
+       
+ 
+  
+   
+   
