@@ -1,25 +1,24 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using UserService.Infrastructure.Extensions;
-using UserService.Infrastructure.Persistence;
-using UserService.Application.Extensions;
+﻿
+using CatalogService.Application.Extensions;
+using CatalogService.Infrastructure.Extensions;
+using CatalogService.Infrastructure.Persistence;
+using CatalogService.Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
-using UserService.Domain.Entities;
-using UserService.Infrastructure.Seed;
-using System.Security.Cryptography;
-using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
-
-namespace UserService.API
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Security.Cryptography;
+namespace CatalogService.API
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public async static Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddInfrastructure(builder.Configuration);
-            builder.Services.AddApplication();
+            builder.Services.AddApplicationServices();
+            builder.Services.AddInfrastructureServices(builder.Configuration);
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -28,7 +27,7 @@ namespace UserService.API
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "UserService",
+                    Title = "CatalogService",
                     Version = "v1"
                 });
 
@@ -57,42 +56,41 @@ namespace UserService.API
                     }
                 });
             });
+
             builder.Services.AddAuthentication("Bearer").AddJwtBearer("Bearer", options =>
+            {
+                var publicKey = File.ReadAllText("/app/rsa/public.pem");
+                var rsa = RSA.Create();
+                rsa.ImportFromPem(publicKey.ToCharArray());
+
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-
-                    var publicKey = File.ReadAllText("rsa/public.pem");
-                    var rsa = RSA.Create();
-                    rsa.ImportFromPem(publicKey.ToCharArray());
-
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero,
-                        ValidIssuer = "UserService",
-                        ValidAudience = "TeaShop",
-                        IssuerSigningKey = new RsaSecurityKey(rsa)
-                    };
-
-                });
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                    ValidIssuer = "UserService",
+                    ValidAudience = "TeaShop",
+                    IssuerSigningKey = new RsaSecurityKey(rsa)
+                };
+            });
 
             builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            app.UseSwagger();
-            app.UseSwaggerUI();
-
             using (var scope = app.Services.CreateScope())
             {
-                var context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
-                var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+                var context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
                 await context.Database.MigrateAsync();
 
-                await UserSeeder.SeedAsync(context, hasher);
+                await CatalogSeeder.SeedAsync(context);
             }
+
+            // Configure the HTTP request pipeline.
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 

@@ -1,4 +1,4 @@
-﻿namespace CatalogService.Models;
+﻿namespace CatalogService.Domain.Entities;
 
 public class BaseModel
 {
