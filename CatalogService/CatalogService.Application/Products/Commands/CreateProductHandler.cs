@@ -3,6 +3,8 @@ using CatalogService.Application.DTOs;
 using CatalogService.Application.Products.Commands;
 using CatalogService.Domain.Entities;
 using CatalogService.Domain.Interfaces;
+using CatalogService.Application.Interfaces;
+using System.Linq;
 using MediatR;
 
 namespace CatalogService.Application.Products.Handlers;
@@ -12,12 +14,13 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
     private readonly ICatalogRepository _repository;
     private readonly IMapper _mapper;
     private readonly ICatalogDbContext _context;
-
-    public CreateProductHandler(ICatalogRepository repository, IMapper mapper, ICatalogDbContext context)
+    private readonly IProductCacheProducer _producer;
+    public CreateProductHandler(ICatalogRepository repository, IMapper mapper, ICatalogDbContext context, IProductCacheProducer producer)
     {
         _repository = repository;
         _mapper = mapper;
         _context = context;
+        _producer = producer;
     }
 
     public async Task<ProductDto> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -28,6 +31,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
 
         var product = new Product
         {
+            Id = Guid.NewGuid(),
             Name = request.Name,
             Ean = request.Ean,
             Price = request.Price,
@@ -38,6 +42,11 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Produc
         };
 
         var result = await _repository.AddProductAsync(product);
+
+        var all = await _repository.GetAllProductsAsync();
+        var dto = all.Select(p => _mapper.Map<ProductDto>(p)).ToList();
+        await _producer.PublishAsync(new ProductCacheEvent { Products = dto }, cancellationToken);
+
         return _mapper.Map<ProductDto>(result);
     }
 }

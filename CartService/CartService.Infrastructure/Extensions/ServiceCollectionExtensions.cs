@@ -4,6 +4,8 @@ using CartService.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
+using CartService.Infrastructure.Cache;
+using CartService.Infrastructure.Messaging;
 
 namespace CartService.Infrastructure.Extensions;
 
@@ -17,6 +19,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICartService, Application.Services.CartService>();
 
         services.AddScoped<ICartRepository, RedisCartRepository>();
+
+        services.AddSingleton<IProductCache, ProductCache>();
+        services.AddHostedService<ProductCacheConsumer>();
+
         return services;
     }
 }
