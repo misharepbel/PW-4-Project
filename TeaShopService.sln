@@ -18,9 +18,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderService.Infrastructure", "OrderService\OrderService.Infrastructure\OrderService.Infrastructure.csproj", "{0985353F-01F5-4A74-8234-6E72F0826A89}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UserService", "UserService", "{A4A443F7-A60B-4A14-A62C-65B72BD53E2A}"
-	ProjectSection(SolutionItems) = preProject
-		UserService\UserService.API\Dockerfile = UserService\UserService.API\Dockerfile
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService.API", "UserService\UserService.API\UserService.API.csproj", "{B674F543-377D-48AF-8C72-9FFED9F064F0}"
 EndProject
@@ -48,13 +45,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatalogService.Infrastructu
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CartService", "CartService", "{6386C570-BFAD-4A45-B8EF-6DFB19FDDA2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CartService.Domain", "CartService\CartService.Domain\CartService.Domain.csproj", "{480F5040-6F2A-4029-A247-4E770EA5012E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CartService.Domain", "CartService\CartService.Domain\CartService.Domain.csproj", "{480F5040-6F2A-4029-A247-4E770EA5012E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CartService.Application", "CartService\CartService.Application\CartService.Application.csproj", "{FCB20896-CA02-44E7-8931-9E757509124E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CartService.Application", "CartService\CartService.Application\CartService.Application.csproj", "{FCB20896-CA02-44E7-8931-9E757509124E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CartService.Infrastructure", "CartService\CartService.Infrastructure\CartService.Infrastructure.csproj", "{3F825FB8-E0F8-4ED2-A901-7E208F32A4F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CartService.Infrastructure", "CartService\CartService.Infrastructure\CartService.Infrastructure.csproj", "{3F825FB8-E0F8-4ED2-A901-7E208F32A4F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CartService.API", "CartService\CartService.API\CartService.API.csproj", "{A5635F5E-E5C5-4B88-9912-804476C48831}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CartService.API", "CartService\CartService.API\CartService.API.csproj", "{A5635F5E-E5C5-4B88-9912-804476C48831}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
