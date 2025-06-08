@@ -3,6 +3,10 @@ using CatalogService.Application.Extensions;
 using CatalogService.Infrastructure.Extensions;
 using CatalogService.Infrastructure.Persistence;
 using CatalogService.Infrastructure.Seeders;
+using CatalogService.Application.Interfaces;
+using AutoMapper;
+using CatalogService.Application.DTOs;
+using CatalogService.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -59,9 +63,15 @@ namespace CatalogService.API
 
             builder.Services.AddAuthentication("Bearer").AddJwtBearer("Bearer", options =>
             {
-                var publicKey = File.ReadAllText("/app/rsa/public.pem");
+                var publicKeyEnv = Environment.GetEnvironmentVariable("JWT_PUBLIC_KEY");
+
+                if (string.IsNullOrWhiteSpace(publicKeyEnv))
+                    throw new InvalidOperationException("JWT_PUBLIC_KEY is not set.");
+
+                publicKeyEnv = publicKeyEnv.Replace("\\n", "\n");
+
                 var rsa = RSA.Create();
-                rsa.ImportFromPem(publicKey.ToCharArray());
+                rsa.ImportFromPem(publicKeyEnv.ToCharArray());
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -85,6 +95,13 @@ namespace CatalogService.API
                 await context.Database.MigrateAsync();
 
                 await CatalogSeeder.SeedAsync(context);
+
+                var repo = scope.ServiceProvider.GetRequiredService<ICatalogRepository>();
+                var producer = scope.ServiceProvider.GetRequiredService<IProductCacheProducer>();
+                var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                var products = await repo.GetAllProductsAsync();
+                var dto = products.Select(p => mapper.Map<ProductDto>(p)).ToList();
+                await producer.PublishAsync(new ProductCacheEvent { Products = dto });
             }
 
             // Configure the HTTP request pipeline.

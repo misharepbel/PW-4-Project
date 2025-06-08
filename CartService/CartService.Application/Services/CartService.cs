@@ -2,6 +2,8 @@ using AutoMapper;
 using CartService.Application.DTOs;
 using CartService.Domain.Entities;
 using CartService.Domain.Interfaces;
+using CartService.Application.Services;
+using System.Linq;
 
 namespace CartService.Application.Services;
 
@@ -9,11 +11,12 @@ public class CartService : ICartService
 {
     private readonly ICartRepository _repo;
     private readonly IMapper _mapper;
-
-    public CartService(ICartRepository repo, IMapper mapper)
+    private readonly IProductCache _cache;
+    public CartService(ICartRepository repo, IMapper mapper, IProductCache cache)
     {
         _repo = repo;
         _mapper = mapper;
+        _cache = cache;
     }
 
     public async Task<CartDto?> GetAsync(Guid userId, CancellationToken ct = default)
@@ -22,8 +25,17 @@ public class CartService : ICartService
         return cart is null ? null : _mapper.Map<CartDto>(cart);
     }
 
+    public async Task<List<CartDto>> GetAllAsync(CancellationToken ct = default)
+    {
+        var carts = await _repo.GetAllAsync();
+        return carts.Select(c => _mapper.Map<CartDto>(c)).ToList();
+    }
+
     public async Task AddItemAsync(Guid userId, CartItemDto itemDto, CancellationToken ct = default)
     {
+        if (!_cache.Contains(itemDto.ProductId))
+            throw new ArgumentException("Invalid product id");
+
         var item = _mapper.Map<CartItem>(itemDto);
         item.Id = Guid.NewGuid();
         item.CartUserId = userId;

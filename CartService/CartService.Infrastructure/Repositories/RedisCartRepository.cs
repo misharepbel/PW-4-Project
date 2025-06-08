@@ -8,9 +8,11 @@ namespace CartService.Infrastructure.Repositories;
 public class RedisCartRepository : ICartRepository
 {
     private readonly IDatabase _db;
+    private readonly IConnectionMultiplexer _connection;
 
     public RedisCartRepository(IConnectionMultiplexer connection)
     {
+        _connection = connection;
         _db = connection.GetDatabase();
     }
 
@@ -53,6 +55,24 @@ public class RedisCartRepository : ICartRepository
     public async Task ClearAsync(Guid userId)
     {
         await _db.KeyDeleteAsync(GetKey(userId));
+    }
+
+    public async Task<List<Cart>> GetAllAsync()
+    {
+        var server = _connection.GetServer(_connection.GetEndPoints().First());
+        var keys = server.Keys(pattern: "cart:*");
+        var carts = new List<Cart>();
+        foreach (var key in keys)
+        {
+            var value = await _db.StringGetAsync(key);
+            if (!value.IsNullOrEmpty)
+            {
+                var cart = JsonSerializer.Deserialize<Cart>(value!);
+                if (cart != null)
+                    carts.Add(cart);
+            }
+        }
+        return carts;
     }
 
     public Task SaveChangesAsync() => Task.CompletedTask;

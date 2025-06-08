@@ -12,7 +12,7 @@ todo.txt
 .env
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
-
+*.bat
 # Mono auto generated files
 mono_crash.*
 
@@ -68,7 +68,7 @@ artifacts/
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
-
+*.patch
 # StyleCop
 StyleCopReport.xml
 

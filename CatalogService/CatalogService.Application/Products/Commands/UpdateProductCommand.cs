@@ -4,7 +4,7 @@ using MediatR;
 namespace CatalogService.Application.Products.Commands;
 
 public record UpdateProductCommand(
-    int Id,
+    Guid Id,
     string Name,
     string Ean,
     decimal Price,

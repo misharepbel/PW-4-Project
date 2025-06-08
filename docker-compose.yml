@@ -1,6 +1,27 @@
 ﻿version: '3.4'
 
 services:
+  kafka:
+    image: bitnami/kafka:3.6.1
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: yes
+      KAFKA_KRAFT_CLUSTER_ID: fdAWMfT7TNSt891-ezfaeg
+      KAFKA_BROKER_ID: 1
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_KRAFT_PREPARE: "yes"
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_LISTENERS: BROKER://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: BROKER://kafka:9092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: BROKER:PLAINTEXT,CONTROLLER:PLAINTEXT
+    volumes:
+      - kafka_data:/bitnami/kafka
   redis:
     image: redis:latest
     ports:
@@ -19,6 +40,7 @@ services:
     environment:
       #extract the password to a .env later
       ConnectionStrings__Default: "Server=sqlserver;Database=OrdersDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+      JWT_PUBLIC_KEY: "${JWT_PUBLIC_KEY}"
     expose:
       - "8080"
     depends_on:
@@ -30,12 +52,12 @@ services:
         dockerfile: UserService.API/Dockerfile
       environment:
         ConnectionStrings__Default: "Server=sqlserver;Database=UsersDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+        JWT_PRIVATE_KEY: "${JWT_PRIVATE_KEY}"
+        JWT_PUBLIC_KEY: "${JWT_PUBLIC_KEY}"
       expose:
         - "8080"
       depends_on:
         - sqlserver
-      volumes:
-        - ./rsa:/app/rsa:ro
 
   catalogservice:
     build:
@@ -43,10 +65,14 @@ services:
       dockerfile: CatalogService.API/Dockerfile
     environment:
       ConnectionStrings__Default: "Server=sqlserver;Database=CatalogDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+      Kafka__BootstrapServers: "kafka:9092"
+      Kafka__ProductCacheTopic: "product-cache"
+      JWT_PUBLIC_KEY: "${JWT_PUBLIC_KEY}"
     expose:
       - "8080"
     depends_on:
       - sqlserver
+      - kafka
     volumes:
       - ./rsa/public.pem:/app/rsa/public.pem:ro
 
@@ -55,15 +81,17 @@ services:
       context: ./CartService
       dockerfile: CartService.API/Dockerfile
     environment:
-      ConnectionStrings__Redis: "redis:6379"
+      ConnectionStrings__Redis: "redis"
+      Kafka__BootstrapServers: "kafka:9092"
+      Kafka__ProductCacheTopic: "product-cache"
     expose:
       - "8080"
     depends_on:
       - redis
+      - kafka
+      - catalogservice
     volumes:
       - ./rsa/public.pem:/app/rsa/public.pem:ro
-
-
   apigateway:
     build:
       context: .
@@ -79,7 +107,8 @@ services:
          condition: service_started
       cartservice:
          condition: service_started
-
+volumes:
+   kafka_data:
       
 
  
