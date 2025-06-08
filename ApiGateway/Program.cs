@@ -14,7 +14,7 @@ namespace ApiGateway
         private static async Task WaitForService(string name, string url, int maxRetries = 10, int delaySeconds = 2)
         {
             using var httpClient = new HttpClient();
-
+            Console.WriteLine($"Waiting for: {name} {url}");
             for (int i = 0; i < maxRetries; i++)
             {
                 try
@@ -28,14 +28,14 @@ namespace ApiGateway
                 }
                 catch
                 {
-                   // ignore refused connection
+                    // ignore refused connection
                 }
 
-                Debug.Print($"Waiting for {name}... retry {i + 1}/{maxRetries}");
+                Console.WriteLine($"Waiting for {name}... retry {i + 1}/{maxRetries}");
                 await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
             }
 
-            Debug.Print($"⚠️ {name} did not respond after {maxRetries} retries.");
+            Console.WriteLine($"⚠️ {name} did not respond after {maxRetries} retries.");
         }
 
         public static async Task Main(string[] args)
