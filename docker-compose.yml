@@ -93,6 +93,22 @@ services:
       - kafka
       - catalogservice
     volumes: []
+  notificationservice:
+    build:
+      context: ./NotificationService
+      dockerfile: NotificationService.API/Dockerfile
+    environment:
+      Kafka__BootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
+      Kafka__UserRegisteredTopic: "${KAFKA_USER_REGISTERED_TOPIC}"
+      Kafka__PasswordResetTopic: "${KAFKA_PASSWORD_RESET_TOPIC}"
+      Smtp__Server: "${SMTP_SERVER}"
+      Smtp__Port: "${SMTP_PORT}"
+      Smtp__Username: "${SMTP_USERNAME}"
+      Smtp__Password: "${SMTP_PASSWORD}"
+    expose:
+      - "8080"
+    depends_on:
+      - kafka
   apigateway:
     build:
       context: .
