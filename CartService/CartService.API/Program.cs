@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Security.Cryptography;
+using System;
 
 namespace CartService.API
 {
@@ -20,6 +21,7 @@ namespace CartService.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
+                options.EnableAnnotations();
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "CartService", Version = "v1" });
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -49,9 +51,12 @@ namespace CartService.API
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    var publicKey = File.ReadAllText("/app/rsa/public.pem");
+                    var publicKeyEnv = Environment.GetEnvironmentVariable("JWT_PUBLIC_KEY");
+                    if (string.IsNullOrWhiteSpace(publicKeyEnv))
+                        throw new InvalidOperationException("JWT_PUBLIC_KEY is not set.");
+                    publicKeyEnv = publicKeyEnv.Replace("\\n", "\n");
                     var rsa = RSA.Create();
-                    rsa.ImportFromPem(publicKey.ToCharArray());
+                    rsa.ImportFromPem(publicKeyEnv.ToCharArray());
 
                     options.TokenValidationParameters = new TokenValidationParameters
                     {

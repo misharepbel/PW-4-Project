@@ -31,6 +31,12 @@ namespace OrderService.Infrastructure.Repositories
                      .Include(o => o.OrderItems)
                      .ToListAsync();
 
+        public async Task<List<Order>> GetByUserIdAsync(Guid userId) =>
+            await _db.Orders
+                     .Include(o => o.OrderItems)
+                     .Where(o => o.UserId == userId)
+                     .ToListAsync();
+
         public async Task DeleteAsync(Guid id)
         {
             var order = await _db.Orders.FindAsync(id);

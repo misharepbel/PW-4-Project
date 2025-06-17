@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using OrderService.Application.Handlers;
-using OrderService.Application.Services;
-using OrderService.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using OrderService.Application.Extensions;
+using OrderService.Infrastructure.Extensions;
 using OrderService.Infrastructure.Data;
-using OrderService.Infrastructure.Repositories;
-using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Security.Cryptography;
 
 namespace OrderService
 {
@@ -15,29 +16,73 @@ namespace OrderService
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddScoped<IOrderService, Application.Services.OrderService>();
 
             builder.Services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
                 {
-                    policy.WithOrigins("http://teashopservice:8080") // from TeaShopService
+                    policy.WithOrigins("http://teashopservice:8080")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
             });
 
-            builder.Services.AddDbContext<OrdersDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
-            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-            builder.Services.AddMediatR(cfg =>
-                cfg.RegisterServicesFromAssemblies(
-                    Assembly.GetExecutingAssembly(),                // OrderService.dll
-                    typeof(CreateOrderCommandHandler).Assembly));
+            builder.Services.AddApplicationServices();
+            builder.Services.AddInfrastructureServices(builder.Configuration);
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.EnableAnnotations();
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "OrderService", Version = "v1" });
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer eyJhbGci...\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT"
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    var publicKeyEnv = Environment.GetEnvironmentVariable("JWT_PUBLIC_KEY");
+                    if (string.IsNullOrWhiteSpace(publicKeyEnv))
+                        throw new InvalidOperationException("JWT_PUBLIC_KEY is not set.");
+                    publicKeyEnv = publicKeyEnv.Replace("\\n", "\n");
+                    var rsa = RSA.Create();
+                    rsa.ImportFromPem(publicKeyEnv.ToCharArray());
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero,
+                        ValidIssuer = "UserService",
+                        ValidAudience = "TeaShop",
+                        IssuerSigningKey = new RsaSecurityKey(rsa)
+                    };
+                });
+
+            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
@@ -54,6 +99,7 @@ namespace OrderService
             app.UseSwaggerUI();
 
             //app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
 

@@ -10,7 +10,17 @@ namespace OrderService.Application.Handlers
     {
         private readonly IOrderService _srv;
         public GetOrderByIdQueryHandler(IOrderService srv) => _srv = srv;
-        public Task<OrderDto?> Handle(GetOrderByIdQuery q, CancellationToken ct)
-            => _srv.GetAsync(q.OrderId);
+
+        public async Task<OrderDto?> Handle(GetOrderByIdQuery q, CancellationToken ct)
+        {
+            var order = await _srv.GetAsync(q.OrderId, ct);
+            if (order is null)
+                return null;
+
+            if (order.UserId != q.UserId && !q.IsAdmin)
+                return null;
+
+            return order;
+        }
     }
 }
