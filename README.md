@@ -2,11 +2,21 @@
 
 This solution contains several microservices including CatalogService and CartService. Kafka is used to broadcast product cache updates from the catalog to consumers.
 
+## TODO
+
+- Implement `InvoiceService`
+- Create `PaymentService` or handle payments within `OrderService`
+- Write unit and integration tests
+- Send receipts via email after successful payments  
+      *(consider using `NotificationService` or implement separately in each service)*
+- Add ability for users to edit their account details
+- Implement password reset functionality
+
 ## Running with Docker
 
 Docker Compose includes SQL Server, Redis and a Kafka broker running in KRaft mode (no Zookeeper). Use the following command to start all services:
 
-Create a `.env` file (see `.env.example`) with the required `CONNECTIONSTRING`,
+Create a `.env` file (see `.env.example`) with the required `SERVICE_CONNECTIONSTRING`,
 Kafka settings and JWT keys, then run:
 
 ```bash
@@ -14,6 +24,7 @@ docker-compose up --build
 ```
 
 Kafka will be available at `kafka:9092` for the services.
+ApiGateway will be available at `localhost:8080/swagger`
 
 ## Product Cache Events
 
