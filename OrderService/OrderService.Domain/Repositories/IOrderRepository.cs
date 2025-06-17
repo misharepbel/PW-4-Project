@@ -10,6 +10,7 @@ namespace OrderService.Domain.Repositories
         Task AddAsync(Order order);
         Task<Order?> GetByIdAsync(Guid id);
         Task<List<Order>> GetAllAsync();
+        Task<List<Order>> GetByUserIdAsync(Guid userId);
         Task DeleteAsync(Guid id);
         Task SaveChangesAsync();
     }

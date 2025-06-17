@@ -36,6 +36,14 @@ namespace OrderService.Controllers
         public async Task<ActionResult<List<OrderDto>>> GetAll()
             => Ok(await _m.Send(new GetOrdersQuery()));
 
+        [HttpGet("/my")]
+        public async Task<ActionResult<List<OrderDto>>> GetMyOrders()
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var orders = await _m.Send(new GetOrdersByUserIdQuery(userId));
+            return Ok(orders);
+        }
+
         [HttpPut("/status/{id:guid}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] string status)
