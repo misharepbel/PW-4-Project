@@ -6,6 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace CartService.API.Controllers;
 
@@ -20,9 +21,11 @@ public class CartController(IMediator mediator) : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
+    [SwaggerOperation(Summary = "Health check", Description = "Access: Public")]
     public IActionResult Get() => Ok("CartService is healthy.");
 
     [HttpGet("cached")]
+    [SwaggerOperation(Summary = "Show cached products", Description = "Access: User & Admin")]
     public IActionResult GetCachedProducts([FromServices] IProductCache cache)
     {
         var cachedItems = cache;
@@ -30,10 +33,12 @@ public class CartController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("mycart")]
+    [SwaggerOperation(Summary = "Get current user's cart", Description = "Access: User & Admin")]
     public async Task<ActionResult<CartDto?>> GetMyCart()
         => Ok(await _mediator.Send(new GetCartQuery(CurrentUserId())));
 
     [HttpPost("item")]
+    [SwaggerOperation(Summary = "Add item to cart", Description = "Access: User & Admin")]
     public async Task<IActionResult> AddItem([FromBody] CartItemDto item)
     {
         await _mediator.Send(new AddItemCommand(CurrentUserId(), item));
@@ -41,6 +46,7 @@ public class CartController(IMediator mediator) : ControllerBase
     }
 
     [HttpDelete("item/{productId}")]
+    [SwaggerOperation(Summary = "Remove item from cart", Description = "Access: User & Admin")]
     public async Task<IActionResult> RemoveItem(Guid productId)
     {
         await _mediator.Send(new RemoveItemCommand(CurrentUserId(), productId));
@@ -48,9 +54,18 @@ public class CartController(IMediator mediator) : ControllerBase
     }
 
     [HttpDelete("mycart")]
+    [SwaggerOperation(Summary = "Clear current cart", Description = "Access: User & Admin")]
     public async Task<IActionResult> Clear()
     {
         await _mediator.Send(new ClearCartCommand(CurrentUserId()));
         return NoContent();
+    }
+
+    [HttpPost("checkout")]
+    [SwaggerOperation(Summary = "Checkout cart", Description = "Access: User & Admin")]
+    public async Task<IActionResult> Checkout()
+    {
+        await _mediator.Send(new CheckoutCartCommand(CurrentUserId()));
+        return Ok();
     }
 }
