@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IProductCache, ProductCache>();
         services.AddHostedService<ProductCacheConsumer>();
+        services.AddHostedService<OrderCreatedConsumer>();
         services.AddSingleton<ICartCheckoutProducer, KafkaCartCheckoutProducer>();
 
         return services;
