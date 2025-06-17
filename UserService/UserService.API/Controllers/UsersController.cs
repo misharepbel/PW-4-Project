@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Users.Commands;
 using UserService.Application.Users.Queries;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace UserService.API.Controllers;
 
@@ -18,10 +19,12 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
+    [SwaggerOperation(Summary = "Health check", Description = "Access: Public")]
     public Task<ActionResult<Guid>> HealthCheck()
     => Task.FromResult<ActionResult<Guid>>(Ok("UserService is listening..."));
 
     [HttpPost("register")]
+    [SwaggerOperation(Summary = "Register a new user", Description = "Access: Public")]
     public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
     {
         var userId = await _mediator.Send(command);
@@ -29,6 +32,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("login")]
+    [SwaggerOperation(Summary = "Log in and obtain JWT", Description = "Access: Public")]
     public async Task<IActionResult> Login([FromBody] LoginUserCommand command)
     {
         var token = await _mediator.Send(command);
@@ -38,6 +42,7 @@ public class UsersController : ControllerBase
     [HttpGet("admin-test")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(string), 200)]
+    [SwaggerOperation(Summary = "Example endpoint for admins", Description = "Access: Admin only")]
     public IActionResult OnlyForAdmins()
     {
         return Ok(new
@@ -49,6 +54,7 @@ public class UsersController : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
+    [SwaggerOperation(Summary = "Get current user's details", Description = "Access: User & Admin")]
     public async Task<IActionResult> Me()
     {
         var dto = await _mediator.Send(new GetCurrentUserQuery(User));
@@ -57,6 +63,7 @@ public class UsersController : ControllerBase
 
     [HttpGet("{id:guid}")]
     [Authorize(Roles = "Admin")]
+    [SwaggerOperation(Summary = "Get user by id", Description = "Access: Admin only")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var dto = await _mediator.Send(new GetUserByIdQuery(id));
@@ -65,6 +72,7 @@ public class UsersController : ControllerBase
 
     [HttpGet("all")]
     [Authorize(Roles = "Admin")]
+    [SwaggerOperation(Summary = "List all users", Description = "Access: Admin only")]
     public async Task<IActionResult> GetAll()
     {
         var list = await _mediator.Send(new GetAllUsersQuery());
