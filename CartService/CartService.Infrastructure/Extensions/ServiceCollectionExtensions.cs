@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using CartService.Infrastructure.Cache;
 using CartService.Infrastructure.Messaging;
+using CartService.Application.Interfaces;
 
 namespace CartService.Infrastructure.Extensions;
 
@@ -22,6 +23,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IProductCache, ProductCache>();
         services.AddHostedService<ProductCacheConsumer>();
+        services.AddSingleton<ICartCheckoutProducer, KafkaCartCheckoutProducer>();
 
         return services;
     }

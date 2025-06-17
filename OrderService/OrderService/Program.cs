@@ -1,10 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OrderService.Application.Handlers;
-using OrderService.Application.Services;
-using OrderService.Domain.Repositories;
+using OrderService.Application.Extensions;
+using OrderService.Infrastructure.Extensions;
 using OrderService.Infrastructure.Data;
-using OrderService.Infrastructure.Repositories;
-using System.Net.NetworkInformation;
 using System.Reflection;
 
 namespace OrderService
@@ -15,25 +12,19 @@ namespace OrderService
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddScoped<IOrderService, Application.Services.OrderService>();
 
             builder.Services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
                 {
-                    policy.WithOrigins("http://teashopservice:8080") // from TeaShopService
+                    policy.WithOrigins("http://teashopservice:8080")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
             });
 
-            builder.Services.AddDbContext<OrdersDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
-            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-            builder.Services.AddMediatR(cfg =>
-                cfg.RegisterServicesFromAssemblies(
-                    Assembly.GetExecutingAssembly(),                // OrderService.dll
-                    typeof(CreateOrderCommandHandler).Assembly));
+            builder.Services.AddApplicationServices();
+            builder.Services.AddInfrastructureServices(builder.Configuration);
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();

@@ -53,4 +53,11 @@ public class CartController(IMediator mediator) : ControllerBase
         await _mediator.Send(new ClearCartCommand(CurrentUserId()));
         return NoContent();
     }
+
+    [HttpPost("checkout")]
+    public async Task<IActionResult> Checkout()
+    {
+        await _mediator.Send(new CheckoutCartCommand(CurrentUserId()));
+        return Ok();
+    }
 }
