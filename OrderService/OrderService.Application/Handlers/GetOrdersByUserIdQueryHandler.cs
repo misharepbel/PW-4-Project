@@ -25,6 +25,7 @@ namespace OrderService.Application.Handlers
                 Items = o.OrderItems.Select(i => new OrderItemDto
                 {
                     ProductId = i.ProductId,
+                    ProductName = i.ProductName,
                     Quantity = i.Quantity,
                     UnitPrice = i.UnitPrice
                 }).ToList()
