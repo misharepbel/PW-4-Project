@@ -95,7 +95,7 @@ services:
     volumes: []
   notificationservice:
     build:
-      context: ./NotificationService
+      context: .
       dockerfile: NotificationService/Dockerfile
     environment:
       Kafka__BootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
