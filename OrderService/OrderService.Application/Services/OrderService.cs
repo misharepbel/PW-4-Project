@@ -1,15 +1,22 @@
 ﻿// OrderService.Application/Services/OrderService.cs
 using OrderService.Application.DTO;
+using OrderService.Application.Interfaces;
 using OrderService.Domain.Entities;
 using OrderService.Domain.Repositories;
+using System.Linq;
 
 namespace OrderService.Application.Services
 {
     public sealed class OrderService : IOrderService
     {
         private readonly IOrderRepository _repo;
+        private readonly IOrderCreatedProducer _producer;
 
-        public OrderService(IOrderRepository repo) => _repo = repo;
+        public OrderService(IOrderRepository repo, IOrderCreatedProducer producer)
+        {
+            _repo = repo;
+            _producer = producer;
+        }
 
         public async Task<Guid> CreateAsync(CreateOrderDto dto, CancellationToken ct = default)
         {
@@ -38,6 +45,21 @@ namespace OrderService.Application.Services
             }
 
             await _repo.AddAsync(order);
+
+            var evt = new OrderCreatedEvent
+            {
+                OrderId = order.Id,
+                UserId = order.UserId,
+                Items = order.OrderItems.Select(oi => new OrderItemDto
+                {
+                    ProductId = oi.ProductId,
+                    ProductName = oi.ProductName,
+                    Quantity = oi.Quantity,
+                    UnitPrice = oi.UnitPrice
+                }).ToList()
+            };
+            await _producer.PublishAsync(evt, ct);
+
             return order.Id;
         }
 
