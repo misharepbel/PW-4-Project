@@ -22,7 +22,13 @@ public class CheckoutCartHandler : IRequestHandler<CheckoutCartCommand>
         if (cart == null || cart.Items.Count == 0)
             throw new InvalidOperationException("Cart is empty.");
 
-        var evt = new CartCheckedOutEvent { UserId = cart.UserId, Items = cart.Items };
+        var evt = new CartCheckedOutEvent
+        {
+            UserId = cart.UserId,
+            Items = cart.Items,
+            DeliveryLocation = request.Info.DeliveryLocation,
+            PaymentMethod = request.Info.PaymentMethod
+        };
         await _producer.PublishAsync(evt, cancellationToken);
     }
 }

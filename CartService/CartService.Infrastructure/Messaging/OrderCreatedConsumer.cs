@@ -1,35 +1,33 @@
+using CartService.Application.DTOs;
+using CartService.Application.Services;
 using Confluent.Kafka;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using OrderService.Application.Commands;
-using OrderService.Application.DTO;
 
-namespace OrderService.Infrastructure.Messaging;
+namespace CartService.Infrastructure.Messaging;
 
-public class CartCheckoutConsumer : BackgroundService
+public class OrderCreatedConsumer : BackgroundService
 {
     private IConsumer<Ignore, string>? _consumer;
     private readonly string _topic;
-    private readonly IMediator _mediator;
-    private readonly ILogger<CartCheckoutConsumer> _logger;
+    private readonly ICartService _service;
+    private readonly ILogger<OrderCreatedConsumer> _logger;
     private readonly IConfiguration _configuration;
 
-    public CartCheckoutConsumer(IConfiguration configuration, IMediator mediator, ILogger<CartCheckoutConsumer> logger)
+    public OrderCreatedConsumer(IConfiguration configuration, ICartService service, ILogger<OrderCreatedConsumer> logger)
     {
         _configuration = configuration;
-        _mediator = mediator;
+        _service = service;
         _logger = logger;
-        _topic = configuration["Kafka:CartCheckedOutTopic"] ?? "cart-checked-out";
+        _topic = configuration["Kafka:OrderCreatedTopic"] ?? "order-created";
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var config = new ConsumerConfig
         {
-            GroupId = "orderservice",
+            GroupId = "cartservice",
             BootstrapServers = _configuration["Kafka:BootstrapServers"] ?? "kafka:9092",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = true
@@ -44,28 +42,14 @@ public class CartCheckoutConsumer : BackgroundService
                     _logger.LogInformation("Connecting to Kafka {Broker}...", config.BootstrapServers);
                     _consumer = new ConsumerBuilder<Ignore, string>(config).Build();
                     _consumer.Subscribe(_topic);
-                    _logger.LogInformation("Subscribed to topic '{Topic}'", _topic);
 
                     while (!stoppingToken.IsCancellationRequested)
                     {
                         var result = _consumer.Consume(stoppingToken);
-                        var evt = System.Text.Json.JsonSerializer.Deserialize<CartCheckedOutEvent>(result.Message.Value);
+                        var evt = System.Text.Json.JsonSerializer.Deserialize<OrderCreatedEvent>(result.Message.Value);
                         if (evt != null)
                         {
-                            var dto = new CreateOrderDto
-                            {
-                                UserId = evt.UserId,
-                                DeliveryLocation = evt.DeliveryLocation,
-                                PaymentMethod = evt.PaymentMethod,
-                                Items = evt.Items.Select(i => new CreateOrderItemDto
-                                {
-                                    ProductId = i.ProductId,
-                                    ProductName = i.ProductName,
-                                    Quantity = i.Quantity,
-                                    UnitPrice = i.UnitPrice
-                                }).ToList()
-                            };
-                            await _mediator.Send(new CreateOrderCommand(dto), stoppingToken);
+                            await _service.ClearAsync(evt.UserId, stoppingToken);
                         }
                     }
                 }
@@ -81,5 +65,7 @@ public class CartCheckoutConsumer : BackgroundService
                 }
             }
         }, stoppingToken);
+
+        return Task.CompletedTask;
     }
 }
