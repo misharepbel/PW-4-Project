@@ -29,6 +29,8 @@ namespace OrderService.Application.Services
                 UserId = dto.UserId,
                 OrderDate = DateTime.UtcNow,
                 Status = "New",
+                DeliveryLocation = dto.DeliveryLocation,
+                PaymentMethod = dto.PaymentMethod,
                 OrderItems = []
             };
 
@@ -74,6 +76,8 @@ namespace OrderService.Application.Services
                 UserId = order.UserId,
                 OrderDate = order.OrderDate,
                 Status = order.Status,
+                DeliveryLocation = order.DeliveryLocation,
+                PaymentMethod = order.PaymentMethod,
                 Items = order.OrderItems.Select(oi => new OrderItemDto
                 {
                     ProductId = oi.ProductId,

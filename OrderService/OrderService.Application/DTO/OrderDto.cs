@@ -10,6 +10,8 @@ namespace OrderService.Application.DTO
         public DateTime OrderDate { get; init; }
         public string Status { get; init; } = default!;
         public List<OrderItemDto> Items { get; init; } = [];
+        public string DeliveryLocation { get; init; } = string.Empty;
+        public string PaymentMethod { get; init; } = string.Empty;
         public decimal Total => Items.Sum(i => i.UnitPrice * i.Quantity);
     }
 }
