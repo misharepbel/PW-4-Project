@@ -5,6 +5,7 @@ using System.Security.Claims;
 using OrderService.Application.DTO;
 using OrderService.Application.Commands;
 using OrderService.Application.Queries;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace OrderService.Controllers
 {
@@ -17,10 +18,12 @@ namespace OrderService.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [SwaggerOperation(Summary = "Health check", Description = "Access: Public")]
         public Task<ActionResult<Guid>> HealthCheck()
             => Task.FromResult<ActionResult<Guid>>(Ok("OrderService is listening..."));
 
         [HttpGet("/get/{id:guid}")]
+        [SwaggerOperation(Summary = "Get order by id", Description = "Access: User & Admin (if owner or admin)")]
         public async Task<ActionResult<OrderDto?>> Get(Guid id)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -33,10 +36,12 @@ namespace OrderService.Controllers
 
         [HttpGet("/get")]
         [Authorize(Roles = "Admin")]
+        [SwaggerOperation(Summary = "Get all orders", Description = "Access: Admin only")]
         public async Task<ActionResult<List<OrderDto>>> GetAll()
             => Ok(await _m.Send(new GetOrdersQuery()));
 
         [HttpGet("/my")]
+        [SwaggerOperation(Summary = "Get current user's orders", Description = "Access: User & Admin")]
         public async Task<ActionResult<List<OrderDto>>> GetMyOrders()
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -46,6 +51,7 @@ namespace OrderService.Controllers
 
         [HttpPut("/status/{id:guid}")]
         [Authorize(Roles = "Admin")]
+        [SwaggerOperation(Summary = "Update order status", Description = "Access: Admin only")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] string status)
         {
             await _m.Send(new UpdateOrderStatusCommand(id, status));
@@ -54,6 +60,7 @@ namespace OrderService.Controllers
 
         [HttpDelete("/delete/{id:guid}")]
         [Authorize(Roles = "Admin")]
+        [SwaggerOperation(Summary = "Delete order", Description = "Access: Admin only")]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _m.Send(new DeleteOrderCommand(id));
