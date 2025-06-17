@@ -6,6 +6,9 @@ This solution contains several microservices including CatalogService and CartSe
 
 Docker Compose includes SQL Server, Redis and a Kafka broker running in KRaft mode (no Zookeeper). Use the following command to start all services:
 
+Create a `.env` file (see `.env.example`) with the required `CONNECTIONSTRING`,
+Kafka settings and JWT keys, then run:
+
 ```bash
 docker-compose up --build
 ```

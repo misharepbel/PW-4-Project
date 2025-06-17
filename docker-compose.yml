@@ -38,8 +38,10 @@ services:
       context: ./OrderService
       dockerfile: OrderService/Dockerfile
     environment:
-      #extract the password to a .env later
-      ConnectionStrings__Default: "Server=sqlserver;Database=OrdersDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+      ConnectionStrings__Default: "${CONNECTIONSTRING}"
+      Kafka__BootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
+      Kafka__CartCheckedOutTopic: "${KAFKA_CART_CHECKED_OUT_TOPIC}"
+      Kafka__OrderCreatedTopic: "${KAFKA_ORDER_CREATED_TOPIC}"
       JWT_PUBLIC_KEY: "${JWT_PUBLIC_KEY}"
     expose:
       - "8080"
@@ -51,7 +53,7 @@ services:
         context: ./UserService
         dockerfile: UserService.API/Dockerfile
       environment:
-        ConnectionStrings__Default: "Server=sqlserver;Database=UsersDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
+        ConnectionStrings__Default: "${CONNECTIONSTRING}"
         JWT_PRIVATE_KEY: "${JWT_PRIVATE_KEY}"
         JWT_PUBLIC_KEY: "${JWT_PUBLIC_KEY}"
       expose:
@@ -64,34 +66,33 @@ services:
       context: ./CatalogService
       dockerfile: CatalogService.API/Dockerfile
     environment:
-      ConnectionStrings__Default: "Server=sqlserver;Database=CatalogDb;User=sa;Password=MyPassw0rd!;Encrypt=false;TrustServerCertificate=true"
-      Kafka__BootstrapServers: "kafka:9092"
-      Kafka__ProductCacheTopic: "product-cache"
+      ConnectionStrings__Default: "${CONNECTIONSTRING}"
+      Kafka__BootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
+      Kafka__ProductCacheTopic: "${KAFKA_PRODUCT_CACHE_TOPIC}"
       JWT_PUBLIC_KEY: "${JWT_PUBLIC_KEY}"
     expose:
       - "8080"
     depends_on:
       - sqlserver
       - kafka
-    volumes:
-      - ./rsa/public.pem:/app/rsa/public.pem:ro
+    volumes: []
 
   cartservice:
     build:
       context: ./CartService
       dockerfile: CartService.API/Dockerfile
     environment:
-      ConnectionStrings__Redis: "redis"
-      Kafka__BootstrapServers: "kafka:9092"
-      Kafka__ProductCacheTopic: "product-cache"
+      ConnectionStrings__Redis: "${REDIS_CONNECTIONSTRING}"
+      Kafka__BootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
+      Kafka__ProductCacheTopic: "${KAFKA_PRODUCT_CACHE_TOPIC}"
+      JWT_PUBLIC_KEY: "${JWT_PUBLIC_KEY}"
     expose:
       - "8080"
     depends_on:
       - redis
       - kafka
       - catalogservice
-    volumes:
-      - ./rsa/public.pem:/app/rsa/public.pem:ro
+    volumes: []
   apigateway:
     build:
       context: .
