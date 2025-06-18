@@ -56,6 +56,9 @@ services:
         ConnectionStrings__Default: "${USERS_CONNECTIONSTRING}"
         JWT_PRIVATE_KEY: "${JWT_PRIVATE_KEY}"
         JWT_PUBLIC_KEY: "${JWT_PUBLIC_KEY}"
+        Kafka__BootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
+        Kafka__UserRegisteredTopic: "${KAFKA_USER_REGISTERED_TOPIC}"
+        Kafka__PasswordResetTopic: "${KAFKA_PASSWORD_RESET_TOPIC}"
       expose:
         - "8080"
       depends_on:
