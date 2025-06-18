@@ -47,6 +47,14 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
+    [HttpPost("reset-password")]
+    [SwaggerOperation(Summary = "Reset password with token", Description = "Access: Public")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+    {
+        await _mediator.Send(command);
+        return Ok();
+    }
+
     [HttpGet("admin-test")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(string), 200)]

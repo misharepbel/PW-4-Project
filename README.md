@@ -99,4 +99,12 @@ Below is a short description of the available endpoints in each service and how 
 - `GET /` - Health check
 - `POST /register` - Register a new user
 - `POST /login` - Log in and obtain JWT
+- `POST /password-reset` - Request password reset
+- `POST /reset-password` - Reset password with token
 
+
+### ApiGateway
+
+#### Unauthorized
+- `GET /WeatherForecast` - Example endpoint
+- `GET /WeatherForecast/TestOrderServiceResponse` - Proxy call to OrderService

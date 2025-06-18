@@ -18,9 +18,17 @@ public class KafkaPasswordResetProducer : IPasswordResetProducer, IDisposable
         _producer = new ProducerBuilder<Null, string>(config).Build();
     }
 
+    private record EmailMessage(string To, string Subject, string Body);
+
     public async Task PublishAsync(PasswordResetEvent evt, CancellationToken ct = default)
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(evt);
+        var resetLink = $"https://example.com/reset?token={evt.ResetToken}";
+        var message = new EmailMessage(
+            evt.Email,
+            "Password Reset Request",
+            $"Click <a href='{resetLink}'>here</a> to reset your password.");
+
+        var json = System.Text.Json.JsonSerializer.Serialize(message);
         await _producer.ProduceAsync(_topic, new Message<Null, string> { Value = json }, ct);
     }
 

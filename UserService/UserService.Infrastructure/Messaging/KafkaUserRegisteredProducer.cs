@@ -18,9 +18,16 @@ public class KafkaUserRegisteredProducer : IUserRegisteredProducer, IDisposable
         _producer = new ProducerBuilder<Null, string>(config).Build();
     }
 
+    private record EmailMessage(string To, string Subject, string Body);
+
     public async Task PublishAsync(UserRegisteredEvent evt, CancellationToken ct = default)
     {
-        var json = System.Text.Json.JsonSerializer.Serialize(evt);
+        var message = new EmailMessage(
+            evt.Email,
+            "Welcome to TeaShop",
+            $"Hello {evt.Username}, thank you for registering!");
+
+        var json = System.Text.Json.JsonSerializer.Serialize(message);
         await _producer.ProduceAsync(_topic, new Message<Null, string> { Value = json }, ct);
     }
 
