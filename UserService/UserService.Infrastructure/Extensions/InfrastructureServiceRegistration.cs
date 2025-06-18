@@ -22,6 +22,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddSingleton<IUserRegisteredProducer, KafkaUserRegisteredProducer>();
         services.AddSingleton<IPasswordResetProducer, KafkaPasswordResetProducer>();
+        services.AddSingleton<IResetTokenStore, InMemoryResetTokenStore>();
 
         return services;
     }
