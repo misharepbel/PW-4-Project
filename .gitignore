@@ -3,6 +3,22 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 todo.txt
+########################################
+# SonarQube / dotnet-sonarscanner
+########################################
+
+# Main working folder (created at solution root)
+.sonarqube/
+.sonarqube/**
+
+# Alternate scanner work folder occasionally created by older plug-ins
+.scannerwork/
+.scannerwork/**
+
+# Optional: code-coverage reports you generate for SonarQube
+coverage*.xml
+**/TestResults/**/coverage*.xml
+########################################
 # User-specific files
 *.rsuser
 *.suo

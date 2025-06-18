@@ -7,6 +7,7 @@ using UserService.Domain.Entities;
 using UserService.Domain.Interfaces;
 using UserService.Infrastructure.Auth;
 using UserService.Infrastructure.Persistence;
+using UserService.Infrastructure.Messaging;
 
 namespace UserService.Infrastructure.Extensions;
 
@@ -19,6 +20,9 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddSingleton<IUserRegisteredProducer, KafkaUserRegisteredProducer>();
+        services.AddSingleton<IPasswordResetProducer, KafkaPasswordResetProducer>();
+        services.AddSingleton<IResetTokenStore, InMemoryResetTokenStore>();
 
         return services;
     }
