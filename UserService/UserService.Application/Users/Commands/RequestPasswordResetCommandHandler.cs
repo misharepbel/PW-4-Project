@@ -3,6 +3,7 @@ using System;
 using UserService.Application.DTOs;
 using UserService.Application.Interfaces;
 using UserService.Domain.Interfaces;
+using UserService.Domain.Exceptions;
 
 namespace UserService.Application.Users.Commands;
 
@@ -22,7 +23,7 @@ public class RequestPasswordResetCommandHandler : IRequestHandler<RequestPasswor
     public async Task Handle(RequestPasswordResetCommand request, CancellationToken cancellationToken)
     {
         var user = await _repo.GetByEmailAsync(request.Email)
-            ?? throw new Exception("User not found");
+            ?? throw new UserNotFoundException(request.Email);
 
         var token = Guid.NewGuid().ToString();
         _tokens.Store(user.Id, token);

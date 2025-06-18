@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using UserService.Application.Interfaces;
 using UserService.Domain.Entities;
 using UserService.Domain.Interfaces;
+using UserService.Domain.Exceptions;
 
 namespace UserService.Application.Users.Commands;
 
@@ -23,7 +24,7 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand>
     {
         var userId = _tokens.Take(request.Token) ?? throw new Exception("Invalid token");
 
-        var user = await _repo.GetByIdAsync(userId) ?? throw new Exception("User not found");
+        var user = await _repo.GetByIdAsync(userId) ?? throw new UserNotFoundException(userId.ToString());
 
         user.PasswordHash = _hasher.HashPassword(user, request.NewPassword);
 
