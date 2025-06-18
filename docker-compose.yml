@@ -56,6 +56,9 @@ services:
         ConnectionStrings__Default: "${USERS_CONNECTIONSTRING}"
         JWT_PRIVATE_KEY: "${JWT_PRIVATE_KEY}"
         JWT_PUBLIC_KEY: "${JWT_PUBLIC_KEY}"
+        Kafka__BootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
+        Kafka__UserRegisteredTopic: "${KAFKA_USER_REGISTERED_TOPIC}"
+        Kafka__PasswordResetTopic: "${KAFKA_PASSWORD_RESET_TOPIC}"
       expose:
         - "8080"
       depends_on:
@@ -93,6 +96,24 @@ services:
       - kafka
       - catalogservice
     volumes: []
+  notificationservice:
+    build:
+      context: .
+      dockerfile: NotificationService/Dockerfile
+    environment:
+      Kafka__BootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
+      Kafka__UserRegisteredTopic: "${KAFKA_USER_REGISTERED_TOPIC}"
+      Kafka__PasswordResetTopic: "${KAFKA_PASSWORD_RESET_TOPIC}"
+      Kafka__PaymentReceiptTopic: "${KAFKA_PAYMENT_RECEIPT_TOPIC}"
+      Smtp__Host: "${SMTP_HOST}"
+      Smtp__Port: "${SMTP_PORT}"
+      Smtp__User: "${SMTP_USER}"
+      Smtp__Pass: "${SMTP_PASS}"
+      Smtp__From: "${SMTP_FROM}"
+    expose:
+      - "8080"
+    depends_on:
+      - kafka
   apigateway:
     build:
       context: .

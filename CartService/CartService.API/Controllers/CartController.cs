@@ -63,9 +63,9 @@ public class CartController(IMediator mediator) : ControllerBase
 
     [HttpPost("checkout")]
     [SwaggerOperation(Summary = "Checkout cart", Description = "Access: User & Admin")]
-    public async Task<IActionResult> Checkout()
+    public async Task<IActionResult> Checkout([FromBody] CheckoutInfoDto info)
     {
-        await _mediator.Send(new CheckoutCartCommand(CurrentUserId()));
+        await _mediator.Send(new CheckoutCartCommand(CurrentUserId(), info));
         return Ok();
     }
 }

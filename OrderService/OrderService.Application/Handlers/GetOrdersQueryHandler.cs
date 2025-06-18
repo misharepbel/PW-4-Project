@@ -20,6 +20,8 @@ namespace OrderService.Application.Handlers
                 UserId = o.UserId,
                 OrderDate = o.OrderDate,
                 Status = o.Status,
+                DeliveryLocation = o.DeliveryLocation,
+                PaymentMethod = o.PaymentMethod,
                 Items = o.OrderItems.Select(i => new OrderItemDto
                 {
                     ProductId = i.ProductId,

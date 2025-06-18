@@ -52,13 +52,19 @@ public class CartCheckoutConsumer : BackgroundService
                         var evt = System.Text.Json.JsonSerializer.Deserialize<CartCheckedOutEvent>(result.Message.Value);
                         if (evt != null)
                         {
-                            var dto = new CreateOrderDto { UserId = evt.UserId, Items = evt.Items.Select(i => new CreateOrderItemDto
+                            var dto = new CreateOrderDto
+                            {
+                                UserId = evt.UserId,
+                                DeliveryLocation = evt.DeliveryLocation,
+                                PaymentMethod = evt.PaymentMethod,
+                                Items = evt.Items.Select(i => new CreateOrderItemDto
                                 {
                                     ProductId = i.ProductId,
                                     ProductName = i.ProductName,
                                     Quantity = i.Quantity,
                                     UnitPrice = i.UnitPrice
-                                }).ToList() };
+                                }).ToList()
+                            };
                             await _mediator.Send(new CreateOrderCommand(dto), stoppingToken);
                         }
                     }
