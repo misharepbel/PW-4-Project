@@ -26,6 +26,17 @@ docker-compose up --build
 Kafka will be available at `kafka:9092` for the services.
 ApiGateway will be available at `localhost:8080/swagger`
 
+## Running Tests
+
+From the repository root run:
+
+```bash
+dotnet test CatalogService/CatalogService.UnitTests/CatalogService.UnitTests.csproj
+dotnet test CatalogService/CatalogService.IntegrationTests/CatalogService.IntegrationTests.csproj
+```
+
+The commands restore packages and build the test projects automatically.
+
 ## Product Cache Events
 
 CatalogService publishes a `ProductCacheEvent` with a list of all products whenever the application starts or when products are created, updated or deleted. CartService listens to this topic and keeps an in-memory cache which is used to validate product IDs before items can be added to a cart.

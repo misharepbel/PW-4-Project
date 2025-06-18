@@ -15,8 +15,10 @@ public class CatalogRepositoryTests
         return new CatalogDbContext(options);
     }
 
-    [Fact]
-    public async Task AddProductAndRetrieveById_Works()
+    [Theory]
+    [InlineData("Earl", "T1")]
+    [InlineData("Breakfast", "T2")]
+    public async Task AddProductAndRetrieveById_Works(string productName, string sku)
     {
         using var context = CreateContext();
         var repo = new CatalogRepository(context);
@@ -27,9 +29,9 @@ public class CatalogRepositoryTests
         var product = new Product
         {
             Id = Guid.NewGuid(),
-            Name = "Earl",
+            Name = productName,
             Ean = "1",
-            SKU = "T1",
+            SKU = sku,
             Price = 1m,
             Stock = 1,
             Country = "UK",
@@ -40,7 +42,7 @@ public class CatalogRepositoryTests
 
         var loaded = await repo.GetByIdAsync(product.Id);
         Assert.NotNull(loaded);
-        Assert.Equal("Earl", loaded!.Name);
+        Assert.Equal(productName, loaded!.Name);
         Assert.NotNull(loaded.Category);
     }
 
@@ -84,5 +86,18 @@ public class CatalogRepositoryTests
         var all = await repo.GetAllProductsAsync();
         Assert.Single(all);
         Assert.Equal("Mint", all.First().Name);
+    }
+
+    [Fact]
+    public async Task AddCategoryAndGetAll_ReturnsAllCategories()
+    {
+        using var context = CreateContext();
+        var repo = new CatalogRepository(context);
+
+        await repo.AddCategoryAsync(new Category { Name = "Herbal" });
+        await repo.AddCategoryAsync(new Category { Name = "Black" });
+
+        var categories = await repo.GetAllCategoriesAsync();
+        Assert.Equal(2, categories.Count());
     }
 }

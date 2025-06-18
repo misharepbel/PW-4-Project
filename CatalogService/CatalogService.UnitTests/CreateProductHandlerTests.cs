@@ -56,8 +56,10 @@ public class CreateProductHandlerTests
         producer.Verify(p => p.PublishAsync(It.IsAny<ProductCacheEvent>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact]
-    public async Task Handle_MissingCategory_ThrowsArgumentException()
+    [Theory]
+    [InlineData(99)]
+    [InlineData(100)]
+    public async Task Handle_MissingCategory_ThrowsArgumentException(int categoryId)
     {
         var context = CreateContext();
         var repo = new Mock<ICatalogRepository>();
@@ -65,8 +67,35 @@ public class CreateProductHandlerTests
         var mapper = CreateMapper();
         var handler = new CreateProductHandler(repo.Object, mapper, context, producer.Object);
 
-        var command = new CreateProductCommand("Test", "ean", 1m, 2, "UK", "sku", 99);
+        var command = new CreateProductCommand("Test", "ean", 1m, 2, "UK", "sku", categoryId);
         await Assert.ThrowsAsync<ArgumentException>(() => handler.Handle(command, CancellationToken.None));
         repo.Verify(r => r.AddProductAsync(It.IsAny<Product>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("Earl Grey")]
+    [InlineData("Chamomile")]
+    public async Task Handle_ValidCommand_ReturnsExpectedName(string productName)
+    {
+        var context = CreateContext();
+        var category = new Category { Id = 1, Name = "Tea" };
+        context.Categories.Add(category);
+        await context.SaveChangesAsync();
+
+        var products = new List<Product>();
+        var repo = new Mock<ICatalogRepository>();
+        repo.Setup(r => r.AddProductAsync(It.IsAny<Product>()))
+            .ReturnsAsync((Product p) => { products.Add(p); return p; });
+        repo.Setup(r => r.GetAllProductsAsync())
+            .ReturnsAsync(products);
+
+        var producer = new Mock<IProductCacheProducer>();
+        var mapper = CreateMapper();
+        var handler = new CreateProductHandler(repo.Object, mapper, context, producer.Object);
+
+        var command = new CreateProductCommand(productName, "ean", 1m, 2, "UK", "sku", category.Id);
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        Assert.Equal(productName, result.Name);
     }
 }
