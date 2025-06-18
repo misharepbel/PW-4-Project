@@ -76,6 +76,7 @@ public class UsersController : ControllerBase
         });
     }
 
+
     [HttpGet("me")]
     [Authorize]
     [SwaggerOperation(Summary = "Get current user's details", Description = "Access: User & Admin")]
