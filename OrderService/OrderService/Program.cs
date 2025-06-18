@@ -16,17 +16,6 @@ namespace OrderService
         {
             var builder = WebApplication.CreateBuilder(args);
 
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(policy =>
-                {
-                    policy.WithOrigins("http://teashopservice:8080")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod();
-                });
-            });
-
             builder.Services.AddApplicationServices();
             builder.Services.AddInfrastructureServices(builder.Configuration);
 
