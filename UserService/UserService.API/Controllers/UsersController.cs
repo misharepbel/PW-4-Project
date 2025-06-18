@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Users.Commands;
 using UserService.Application.Users.Queries;
+using UserService.Domain.Exceptions;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace UserService.API.Controllers;
@@ -43,8 +44,15 @@ public class UsersController : ControllerBase
     [SwaggerOperation(Summary = "Request password reset", Description = "Access: Public")]
     public async Task<IActionResult> RequestPasswordReset([FromBody] RequestPasswordResetCommand command)
     {
-        await _mediator.Send(command);
-        return Ok();
+        try
+        {
+            await _mediator.Send(command);
+            return Ok();
+        }
+        catch (UserNotFoundException)
+        {
+            return NotFound();
+        }
     }
 
     [HttpPost("reset-password")]
