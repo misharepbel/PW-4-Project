@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Application.Users.Commands;
 using UserService.Application.Users.Queries;
+using UserService.Application.Users.DTOs;
 using UserService.Domain.Exceptions;
 using System.Security.Claims;
 using Swashbuckle.AspNetCore.Annotations;
@@ -90,13 +91,13 @@ public class UsersController : ControllerBase
     [HttpPut("update")]
     [Authorize]
     [SwaggerOperation(Summary = "Update current user", Description = "Access: User & Admin")]
-    public async Task<IActionResult> Update([FromBody] UpdateUserCommand command)
+    public async Task<IActionResult> Update([FromBody] UpdateUserDto dto)
     {
         var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (idClaim is null)
             return Unauthorized();
 
-        var cmd = new UpdateUserCommand(Guid.Parse(idClaim), command.Email, command.Username);
+        var cmd = new UpdateUserCommand(Guid.Parse(idClaim), dto.Email, dto.Username);
         await _mediator.Send(cmd);
         return Ok();
     }
