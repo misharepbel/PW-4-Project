@@ -122,11 +122,13 @@ services:
       Kafka__BootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
       Kafka__OrderPaidTopic: "${KAFKA_ORDER_PAID_TOPIC}"
       Kafka__PaymentReceiptTopic: "${KAFKA_PAYMENT_RECEIPT_TOPIC}"
+      Kafka__OrderCreatedTopic: "${KAFKA_ORDER_CREATED_TOPIC}"
       JWT_PUBLIC_KEY: "${JWT_PUBLIC_KEY}"
     expose:
       - "8080"
     depends_on:
       - kafka
+      - orderservice
   apigateway:
     build:
       context: .

@@ -59,6 +59,12 @@ public class OrderPaidConsumer : BackgroundService
                             var order = await _repository.GetByIdAsync(evt.OrderId);
                             if (order != null)
                             {
+                                if (order.UserId != evt.UserId)
+                                {
+                                    _logger.LogWarning("Payment user mismatch for order {OrderId}", evt.OrderId);
+                                    continue;
+                                }
+
                                 order.Status = OrderStatus.Paid;
                                 await _repository.SaveChangesAsync();
 
