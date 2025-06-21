@@ -1,52 +1,54 @@
-# TeaShop Services
+# TeaShop Microservices
 
-This solution contains several microservices including CatalogService and CartService. Kafka is used to broadcast product cache updates from the catalog to consumers.
+## TeaShop Services
+- **ApiGateway** - YARP reverse proxy exposing a unified Swagger UI and routing requests to backend services.
+- **CatalogService** - CRUD operations for products and categories. Publishes catalog updates via Kafka.
+- **CartService** - Stores shopping carts in Redis and validates products from the catalog cache. Emits checkout events.
+- **OrderService** - Persists orders in SQL Server and updates order statuses when payments complete.
+- **PaymentService** - Processes payments and publishes `OrderPaid` events.
+- **UserService** - Handles user registration, login, password reset and issues JWT tokens. Enforces roles.
+- **NotificationService** - Sends emails for registration, password reset and payment receipts.
 
-## TODO
-
-- Implement `InvoiceService`
-- Create `PaymentService` or handle payments within `OrderService`
-- Write unit and integration tests
-- Send receipts via email after successful payments  
-      *(consider using `NotificationService` or implement separately in each service)*
-- Add ability for users to edit their account details
-- Implement password reset functionality
+## Tech Stack
+- **.NET 8 / ASP.NET Core** – microservice APIs.
+- **Entity Framework Core & SQL Server** – relational storage for orders, users and catalog.
+- **Redis** – cart storage.
+- **Apache Kafka** – asynchronous communication between services.
+- **MediatR** – simplifies request/response handling inside services.
+- **YARP Reverse Proxy** – gateway routing and aggregated Swagger docs.
+- **Docker & Docker Compose** – containerised deployment.
 
 ## Running with Docker
+1. Copy `.env.example` to `.env` and fill in connection strings, Kafka topics and JWT keys.
+2. Build and launch all services:
+   ```bash
+   docker-compose up --build
+   ```
+3. Open `http://localhost:8080/swagger` to access the gateway and select a service cluster.
 
-Docker Compose includes SQL Server, Redis and a Kafka broker running in KRaft mode (no Zookeeper). Use the following command to start all services:
-
-Create a `.env` file (see `.env.example`) with the required `SERVICE_CONNECTIONSTRING`,
-Kafka settings and JWT keys, then run:
-
-```bash
-docker-compose up --build
-```
-
-Kafka will be available at `kafka:9092` for the services.
-ApiGateway will be available at `localhost:8080/swagger`
+Stop the stack with `docker-compose down`.
 
 ## Running Tests
-
 From the repository root run:
-
 ```bash
 dotnet test CatalogService/CatalogService.UnitTests/CatalogService.UnitTests.csproj
 dotnet test CatalogService/CatalogService.IntegrationTests/CatalogService.IntegrationTests.csproj
 ```
-
 The commands restore packages and build the test projects automatically.
 
+## Requirements and Implementation
+- [x] **Grade 3.0** – Customer details retrieval, Product CRUD, Category CRUD, Cart CRUD, SINGLE SERVICE - Initially provided by a monolithic app combining User, Catalog and Cart features.
+- [x] **Grade 3.5** – All of Grade 3.0 plus unit and integration tests - CatalogService contains dedicated test suites.
+- [x] **Grade 4.0** – All of Grade 3.5 plus JWT with registration, login, password reset, account editing, user roles, cart processing and email receipts - Implemented across UserService, CartService, OrderService and NotificationService.
+- [x] **Grade 4.5** – All of Grade 4.0 deployed as microservices (at least three services) - ApiGateway and six domain services communicate via Kafka.
+- [x] **Grade 5.0** – All of Grade 4.5 packaged as Docker images and using technologies like Kafka or MediatR - Docker Compose builds the stack and services use Kafka and MediatR for messaging.
 ## Product Cache Events
-
-CatalogService publishes a `ProductCacheEvent` with a list of all products whenever the application starts or when products are created, updated or deleted. CartService listens to this topic and keeps an in-memory cache which is used to validate product IDs before items can be added to a cart.
+CatalogService publishes a `ProductCacheEvent` containing all products whenever the catalog changes or on startup. CartService subscribes to this topic and keeps an in-memory cache to validate product IDs before items are added to a cart.
 
 ## API Endpoints
-
 Below is a short description of the available endpoints in each service and how they are secured.
 
 ### CatalogService
-
 #### Admin only
 - `POST /Categories` - Create a category
 - `POST /Products` - Create a product
@@ -63,7 +65,6 @@ Below is a short description of the available endpoints in each service and how 
 - `GET /` - Health check
 
 ### CartService
-
 #### Admin only
 - `GET /admin` - Get all carts
 - `GET /admin/{userId}` - Get cart by user id
@@ -83,7 +84,6 @@ Below is a short description of the available endpoints in each service and how 
 - `GET /` - Health check
 
 ### OrderService
-
 #### Admin only
 - `GET /get` - Get all orders
 - `PUT /status/{id}` - Update order status
@@ -97,7 +97,6 @@ Below is a short description of the available endpoints in each service and how 
 - `GET /` - Health check
 
 ### UserService
-
 #### Admin only
 - `GET /admin-test` - Example endpoint for admins
 - `GET /{id}` - Get user by id
@@ -113,15 +112,12 @@ Below is a short description of the available endpoints in each service and how 
 - `POST /password-reset` - Request password reset
 - `POST /reset-password` - Reset password with token
 
-
 ### ApiGateway
+The gateway exposes `GET /swagger` for API discovery and forwards all other requests to backend services.
 
-#### Unauthorized
-
-## Example Flow
-
-1. User registers -> `UserRegisteredEvent` -> welcome email
-2. User adds items to cart -> `ProductCacheEvent` keeps cache updated
-3. User checks out -> `CartCheckedOutEvent` on **cart-checked-out** -> OrderService creates the order and publishes `OrderCreatedEvent`
-4. `OrderCreatedEvent` -> CartService clears the cart
-5. Payment succeeds -> `OrderPaidEvent` -> OrderService marks the order paid and forwards a receipt to NotificationService
+## Detailed Event Flow
+1. User registration → `UserRegisteredEvent` → NotificationService sends a welcome email.
+2. Password reset → `PasswordResetEvent` → NotificationService delivers a reset link.
+3. Catalog modifications → `ProductCacheEvent` → CartService refreshes its product cache.
+4. Cart checkout → `CartCheckedOutEvent` → OrderService creates an order and CartService clears the cart.
+5. Payment → `OrderPaidEvent` → OrderService marks the order paid and NotificationService emails the receipt.
