@@ -80,9 +80,9 @@ namespace ApiGateway
                     {
                         client.BaseAddress = new Uri(address);
                     });
-                    // waiting for services to start listening   
-                    var swaggerUrl = $"{address.TrimEnd('/')}";
-                    await WaitForService(name, swaggerUrl);
+                    // waiting for services to start listening
+                    var healthUrl = $"{address.TrimEnd('/')}";
+                    await WaitForService(name, healthUrl);
                 }
             }
 
@@ -108,6 +108,7 @@ namespace ApiGateway
                 ui.SwaggerEndpoint("/swagger/UserServiceCluster/swagger.json", "UserService V1");
                 ui.SwaggerEndpoint("/swagger/CatalogServiceCluster/swagger.json", "CatalogService V1");
                 ui.SwaggerEndpoint("/swagger/CartServiceCluster/swagger.json", "CartService V1");
+                ui.SwaggerEndpoint("/swagger/PaymentServiceCluster/swagger.json", "PaymentService V1");
 
 
                 ui.DefaultModelsExpandDepth(-1);
