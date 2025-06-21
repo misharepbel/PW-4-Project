@@ -97,7 +97,7 @@ public class UsersController : ControllerBase
         if (idClaim is null)
             return Unauthorized();
 
-        var cmd = new UpdateUserCommand(Guid.Parse(idClaim), dto.Email, dto.Username);
+        var cmd = new UpdateUserCommand(Guid.Parse(idClaim), dto.Email, dto.Username, dto.Password);
         await _mediator.Send(cmd);
         return Ok();
     }
