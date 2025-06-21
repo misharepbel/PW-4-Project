@@ -5,7 +5,9 @@ using Microsoft.Extensions.Logging;
 using OrderService.Application.DTO;
 using OrderService.Domain.Enums;
 using OrderService.Domain.Repositories;
+using OrderService.Application.Interfaces;
 using System.Text.Json;
+using System.Linq;
 
 namespace OrderService.Infrastructure.Messaging;
 
@@ -16,11 +18,13 @@ public class OrderPaidConsumer : BackgroundService
     private readonly IConfiguration _configuration;
     private readonly IOrderRepository _repository;
     private readonly ILogger<OrderPaidConsumer> _logger;
+    private readonly IEmailProducer _emailProducer;
 
-    public OrderPaidConsumer(IConfiguration configuration, IOrderRepository repository, ILogger<OrderPaidConsumer> logger)
+    public OrderPaidConsumer(IConfiguration configuration, IOrderRepository repository, IEmailProducer emailProducer, ILogger<OrderPaidConsumer> logger)
     {
         _configuration = configuration;
         _repository = repository;
+        _emailProducer = emailProducer;
         _logger = logger;
         _topic = configuration["Kafka:OrderPaidTopic"] ?? "order-paid";
     }
@@ -57,6 +61,13 @@ public class OrderPaidConsumer : BackgroundService
                             {
                                 order.Status = OrderStatus.Paid;
                                 await _repository.SaveChangesAsync();
+
+                                var items = string.Join(", ", order.OrderItems.Select(i => $"{i.ProductName} x{i.Quantity} @ {i.UnitPrice:C}"));
+                                var amount = order.OrderItems.Sum(i => i.TotalPrice);
+                                var body = $"Payment received for order {order.Id} on {DateTime.UtcNow:yyyy-MM-dd}.\n" +
+                                           $"Amount: {amount:C}\nItems: {items}";
+                                var message = new EmailMessage(evt.Email, "Payment Receipt", body);
+                                await _emailProducer.PublishAsync(message, stoppingToken);
                             }
                         }
                     }

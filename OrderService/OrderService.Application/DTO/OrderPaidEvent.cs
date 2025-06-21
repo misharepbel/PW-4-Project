@@ -3,4 +3,5 @@ namespace OrderService.Application.DTO;
 public class OrderPaidEvent
 {
     public Guid OrderId { get; set; }
+    public string Email { get; set; } = string.Empty;
 }
