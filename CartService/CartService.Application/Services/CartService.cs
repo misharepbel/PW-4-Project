@@ -31,14 +31,22 @@ public class CartService : ICartService
         return carts.Select(c => _mapper.Map<CartDto>(c)).ToList();
     }
 
-    public async Task AddItemAsync(Guid userId, CartItemDto itemDto, CancellationToken ct = default)
+    public async Task AddItemAsync(Guid userId, AddCartItemDto itemDto, CancellationToken ct = default)
     {
-        if (!_cache.Contains(itemDto.ProductId))
+        var product = _cache.Get(itemDto.ProductId);
+        if (product is null)
             throw new ArgumentException("Invalid product id");
 
-        var item = _mapper.Map<CartItem>(itemDto);
-        item.Id = Guid.NewGuid();
-        item.CartUserId = userId;
+        var item = new CartItem
+        {
+            Id = Guid.NewGuid(),
+            CartUserId = userId,
+            ProductId = itemDto.ProductId,
+            ProductName = product.Name,
+            Quantity = itemDto.Quantity,
+            UnitPrice = product.Price
+        };
+
         await _repo.AddOrUpdateItemAsync(userId, item);
     }
 

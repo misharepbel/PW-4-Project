@@ -62,7 +62,8 @@ public class CartCheckoutConsumer : BackgroundService
                                     ProductId = i.ProductId,
                                     ProductName = i.ProductName,
                                     Quantity = i.Quantity,
-                                    UnitPrice = i.UnitPrice
+                                    UnitPrice = i.UnitPrice,
+                                    TotalPrice = i.TotalPrice
                                 }).ToList()
                             };
                             await _mediator.Send(new CreateOrderCommand(dto), stoppingToken);
