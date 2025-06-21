@@ -57,14 +57,14 @@ namespace ApiGateway
                         Entry point for all TeaShop microservices.
 
                         Services:
-                        • CatalogService – product and category management
-                        • CartService – shopping cart storage
-                        • OrderService – order processing
-                        • PaymentService – payment handling
-                        • UserService – authentication and user accounts
-                        • NotificationService – email notifications
+                        - `CatalogService` – product and category management
+                        - `CartService` – shopping cart storage
+                        - `OrderService` – order processing
+                        - `PaymentService` – payment handling
+                        - `UserService` – authentication and user accounts
+                        - `NotificationService` – email notifications
 
-                        Select a cluster (e.g. **OrderService V1**) to browse endpoints.
+                        Select a cluster in the upper-right corner under `Select a definition` (e.g. **OrderService V1**) to browse endpoints.
 
                         Example flow:
                         Register -> Add to cart -> Checkout -> OrderCreated ->

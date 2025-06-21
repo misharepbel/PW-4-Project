@@ -41,9 +41,7 @@ The commands restore packages and build the test projects automatically.
 - [x] **Grade 3.5** – All of Grade 3.0 plus unit and integration tests - CatalogService contains dedicated test suites.
 - [x] **Grade 4.0** – All of Grade 3.5 plus JWT with registration, login, password reset, account editing, user roles, cart processing and email receipts - Implemented across UserService, CartService, OrderService and NotificationService.
 - [x] **Grade 4.5** – All of Grade 4.0 deployed as microservices (at least three services) - ApiGateway and six domain services communicate via Kafka.
-- [x] **Grade 5.0** – All of Grade 4.5 packaged as Docker images and using technologies like Kafka or MediatR - Docker Compose builds the stack and services use Kafka and MediatR for messaging.
-## Product Cache Events
-CatalogService publishes a `ProductCacheEvent` containing all products whenever the catalog changes or on startup. CartService subscribes to this topic and keeps an in-memory cache to validate product IDs before items are added to a cart.
+- [x] **Grade 5.0** – All of Grade 4.5 packaged as Docker images and using technologies like Kafka or MediatR - Docker Compose builds the stack and services use Kafka and MediatR
 
 ## API Endpoints
 Below is a short description of the available endpoints in each service and how they are secured.
@@ -111,6 +109,13 @@ Below is a short description of the available endpoints in each service and how 
 - `POST /login` - Log in and obtain JWT
 - `POST /password-reset` - Request password reset
 - `POST /reset-password` - Reset password with token
+
+### PaymentService
+#### Admin and user
+- `POST /simulate-payment` - Simulate payment
+
+#### Unauthorized
+- `GET /` - Health check
 
 ### ApiGateway
 The gateway exposes `GET /swagger` for API discovery and forwards all other requests to backend services.

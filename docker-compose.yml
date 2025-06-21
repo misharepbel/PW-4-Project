@@ -116,8 +116,8 @@ services:
       - kafka
   paymentservice:
     build:
-      context: ./PaymentService
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: PaymentService/Dockerfile
     environment:
       Kafka__BootstrapServers: "${KAFKA_BOOTSTRAP_SERVERS}"
       Kafka__OrderPaidTopic: "${KAFKA_ORDER_PAID_TOPIC}"
