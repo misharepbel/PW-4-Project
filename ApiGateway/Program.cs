@@ -51,16 +51,18 @@ namespace ApiGateway
                     Title = "ApiGateway",
                     Version = "v1",
                     Description = """
-                        This is the entry point for all TeaShop micro-services.
+                        Entry point for all TeaShop micro-services.
 
-                        • Select **OrderService V1** in the drop-down (top right) to browse
-                          the OrderService endpoints routed through the `/orders` prefix.
+                        • Select a cluster (e.g. **OrderService V1**) in the drop-down
+                          to view its endpoints routed through the gateway.
 
-                        • The default “Gateway” doc is intentionally empty – it only serves
-                          as a starting page.
+                        Example workflow with events:
+                        Register -> UserRegisteredEvent -> Add to cart ->
+                        Checkout -> CartCheckedOutEvent -> OrderService -> OrderCreatedEvent ->
+                        Pay -> OrderPaidEvent -> email receipt
 
-                        ⚠️  It can take a few seconds after startup for downstream service
-                           Swagger documents to become available, so changing the swagger might result in an error.
+                        ⚠️  Downstream service docs may take a few seconds after
+                           startup to appear.
                         """
                 });
             });

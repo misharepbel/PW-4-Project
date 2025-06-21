@@ -25,11 +25,14 @@ public class PaymentsController(IOrderPaidProducer orderProducer, IEmailProducer
         var orderEvent = new OrderPaidEvent { OrderId = request.OrderId };
         await _orderProducer.PublishAsync(orderEvent);
 
-        var message = new EmailMessage(email, "Payment Receipt", $"Payment received for order {request.OrderId}.");
+        var items = request.Items is null ? string.Empty : string.Join(", ", request.Items);
+        var body = $"Payment received for order {request.OrderId} on {DateTime.UtcNow:yyyy-MM-dd}.\n" +
+                   $"Amount: {request.Amount:C}\nItems: {items}";
+        var message = new EmailMessage(email, "Payment Receipt", body);
         await _emailProducer.PublishAsync(message);
 
         return Ok();
     }
 }
 
-public record PaymentRequest(Guid OrderId);
+public record PaymentRequest(Guid OrderId, decimal Amount, string[] Items);
