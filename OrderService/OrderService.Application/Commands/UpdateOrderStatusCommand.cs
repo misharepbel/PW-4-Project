@@ -1,7 +1,8 @@
 ﻿using MediatR;
+using OrderService.Domain.Enums;
 using System;
 
 namespace OrderService.Application.Commands
 {
-    public sealed record UpdateOrderStatusCommand(Guid OrderId, string NewStatus) : IRequest;
+    public sealed record UpdateOrderStatusCommand(Guid OrderId, OrderStatus NewStatus) : IRequest;
 }
