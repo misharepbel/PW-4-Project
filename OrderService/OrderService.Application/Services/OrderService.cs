@@ -2,6 +2,7 @@
 using OrderService.Application.DTO;
 using OrderService.Application.Interfaces;
 using OrderService.Domain.Entities;
+using OrderService.Domain.Enums;
 using OrderService.Domain.Repositories;
 using System.Linq;
 
@@ -28,7 +29,7 @@ namespace OrderService.Application.Services
                 Id = Guid.NewGuid(),
                 UserId = dto.UserId,
                 OrderDate = DateTime.UtcNow,
-                Status = "New",
+                Status = OrderStatus.New,
                 DeliveryLocation = dto.DeliveryLocation,
                 PaymentMethod = dto.PaymentMethod,
                 OrderItems = []
