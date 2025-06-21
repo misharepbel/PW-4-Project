@@ -95,6 +95,8 @@ builder.Services.AddProblemDetails(options =>
 });
 
 builder.Services.AddSingleton<IOrderPaidProducer, KafkaOrderPaidProducer>();
+builder.Services.AddSingleton<PaymentService.Cache.IOrderCache, PaymentService.Cache.OrderCache>();
+builder.Services.AddHostedService<PaymentService.Messaging.OrderCreatedConsumer>();
 
 var app = builder.Build();
 
