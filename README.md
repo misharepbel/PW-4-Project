@@ -117,8 +117,6 @@ Below is a short description of the available endpoints in each service and how 
 ### ApiGateway
 
 #### Unauthorized
-- `GET /WeatherForecast` - Example endpoint
-- `GET /WeatherForecast/TestOrderServiceResponse` - Proxy call to OrderService
 
 ## Example Flow
 
