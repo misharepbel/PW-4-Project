@@ -2,6 +2,9 @@
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Yarp.ReverseProxy.Swagger.Extensions;
+using Hellang.Middleware.ProblemDetails;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Xml.Linq;
 
@@ -51,16 +54,24 @@ namespace ApiGateway
                     Title = "ApiGateway",
                     Version = "v1",
                     Description = """
-                        This is the entry point for all TeaShop micro-services.
+                        Entry point for all TeaShop microservices.
 
-                        • Select **OrderService V1** in the drop-down (top right) to browse
-                          the OrderService endpoints routed through the `/orders` prefix.
+                        Services:
+                        - `CatalogService` – product and category management
+                        - `CartService` – shopping cart storage
+                        - `OrderService` – order processing
+                        - `PaymentService` – payment handling
+                        - `UserService` – authentication and user accounts
+                        - `NotificationService` – email notifications
 
-                        • The default “Gateway” doc is intentionally empty – it only serves
-                          as a starting page.
+                        Select a cluster in the upper-right corner under `Select a definition` (e.g. **OrderService V1**) to browse endpoints.
 
-                        ⚠️  It can take a few seconds after startup for downstream service
-                           Swagger documents to become available, so changing the swagger might result in an error.
+                        Example flow:
+                        Register -> Add to cart -> Checkout -> OrderCreated ->
+                        Pay -> OrderPaid -> email receipt
+
+                        ⚠️  Downstream service docs may take a few seconds after
+                           startup to appear.
                         """
                 });
             });
@@ -80,9 +91,9 @@ namespace ApiGateway
                     {
                         client.BaseAddress = new Uri(address);
                     });
-                    // waiting for services to start listening   
-                    var swaggerUrl = $"{address.TrimEnd('/')}";
-                    await WaitForService(name, swaggerUrl);
+                    // waiting for services to start listening
+                    var healthUrl = $"{address.TrimEnd('/')}";
+                    await WaitForService(name, healthUrl);
                 }
             }
 
@@ -95,7 +106,40 @@ namespace ApiGateway
 
             builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
+            builder.Services.AddProblemDetails(options =>
+            {
+                options.Map<ArgumentException>(ex => new ProblemDetails
+                {
+                    Title = ex.Message,
+                    Status = StatusCodes.Status400BadRequest
+                });
+
+                options.Map<InvalidOperationException>(ex => new ProblemDetails
+                {
+                    Title = ex.Message,
+                    Status = StatusCodes.Status400BadRequest
+                });
+
+                options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
+
+                options.OnBeforeWriteDetails = (ctx, details) =>
+                {
+                    if (ctx.Response.StatusCode == StatusCodes.Status500InternalServerError)
+                    {
+                        var loggerFactory = ctx.RequestServices.GetRequiredService<ILoggerFactory>();
+                        var logger = loggerFactory.CreateLogger("ApiGateway");
+                        var error = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
+                        if (error != null)
+                        {
+                            logger.LogError(error, "Unhandled exception occurred");
+                        }
+                    }
+                };
+            });
+
             var app = builder.Build();
+
+            app.UseProblemDetails();
 
             app.UseSwagger();
 
@@ -108,6 +152,7 @@ namespace ApiGateway
                 ui.SwaggerEndpoint("/swagger/UserServiceCluster/swagger.json", "UserService V1");
                 ui.SwaggerEndpoint("/swagger/CatalogServiceCluster/swagger.json", "CatalogService V1");
                 ui.SwaggerEndpoint("/swagger/CartServiceCluster/swagger.json", "CartService V1");
+                ui.SwaggerEndpoint("/swagger/PaymentServiceCluster/swagger.json", "PaymentService V1");
 
 
                 ui.DefaultModelsExpandDepth(-1);

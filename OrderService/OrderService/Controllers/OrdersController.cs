@@ -5,6 +5,7 @@ using System.Security.Claims;
 using OrderService.Application.DTO;
 using OrderService.Application.Commands;
 using OrderService.Application.Queries;
+using OrderService.Domain.Enums;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace OrderService.Controllers
@@ -52,7 +53,7 @@ namespace OrderService.Controllers
         [HttpPut("/status/{id:guid}")]
         [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Update order status", Description = "Access: Admin only")]
-        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] string status)
+        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] OrderStatus status)
         {
             await _m.Send(new UpdateOrderStatusCommand(id, status));
             return NoContent();

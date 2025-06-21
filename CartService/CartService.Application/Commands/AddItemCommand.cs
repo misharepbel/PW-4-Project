@@ -3,4 +3,4 @@ using MediatR;
 
 namespace CartService.Application.Commands;
 
-public record AddItemCommand(Guid UserId, CartItemDto Item) : IRequest;
+public record AddItemCommand(Guid UserId, AddCartItemDto Item) : IRequest;

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using OrderService.Domain.Enums;
 
 namespace OrderService.Application.DTO
 {
@@ -8,7 +9,7 @@ namespace OrderService.Application.DTO
         public Guid Id { get; init; } = Guid.NewGuid();
         public Guid UserId { get; init; }
         public DateTime OrderDate { get; init; }
-        public string Status { get; init; } = default!;
+        public OrderStatus Status { get; init; }
         public List<OrderItemDto> Items { get; init; } = [];
         public string DeliveryLocation { get; init; } = string.Empty;
         public string PaymentMethod { get; init; } = string.Empty;
