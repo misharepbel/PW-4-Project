@@ -9,6 +9,15 @@ public class OrderCache : IOrderCache
 
     public IReadOnlyDictionary<Guid, Guid> Orders => _orders;
 
+    public void Set(Messaging.OrderCacheEvent cache)
+    {
+        _orders.Clear();
+        foreach (var kvp in cache.Orders)
+        {
+            _orders[kvp.Key] = kvp.Value;
+        }
+    }
+
     public bool Contains(Guid orderId) => _orders.ContainsKey(orderId);
 
     public Guid? GetUserId(Guid orderId) => _orders.TryGetValue(orderId, out var userId) ? userId : null;
