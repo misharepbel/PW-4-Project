@@ -7,7 +7,11 @@ using UserService.Domain.Entities;
 using UserService.Infrastructure.Seed;
 using System.Security.Cryptography;
 using Microsoft.OpenApi.Models;
+using Hellang.Middleware.ProblemDetails;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using UserService.Domain.Exceptions;
 
 namespace UserService.API
 {
@@ -87,7 +91,46 @@ namespace UserService.API
 
             builder.Services.AddAuthorization();
 
+            builder.Services.AddProblemDetails(options =>
+            {
+                options.Map<UserNotFoundException>(ex => new ProblemDetails
+                {
+                    Title = ex.Message,
+                    Status = StatusCodes.Status404NotFound
+                });
+
+                options.Map<ArgumentException>(ex => new ProblemDetails
+                {
+                    Title = ex.Message,
+                    Status = StatusCodes.Status400BadRequest
+                });
+
+                options.Map<InvalidOperationException>(ex => new ProblemDetails
+                {
+                    Title = ex.Message,
+                    Status = StatusCodes.Status400BadRequest
+                });
+
+                options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
+
+                options.OnBeforeWriteDetails = (ctx, details) =>
+                {
+                    if (ctx.Response.StatusCode == StatusCodes.Status500InternalServerError)
+                    {
+                        var loggerFactory = ctx.RequestServices.GetRequiredService<ILoggerFactory>();
+                        var logger = loggerFactory.CreateLogger("UserService");
+                        var error = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
+                        if (error != null)
+                        {
+                            logger.LogError(error, "Unhandled exception occurred");
+                        }
+                    }
+                };
+            });
+
             var app = builder.Build();
+
+            app.UseProblemDetails();
 
             // Configure the HTTP request pipeline.
             app.UseSwagger();
