@@ -18,7 +18,10 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddSingleton<IOrderCreatedProducer, KafkaOrderCreatedProducer>();
+        services.AddSingleton<IOrderCacheProducer, KafkaOrderCacheProducer>();
+        services.AddSingleton<IEmailProducer, KafkaEmailProducer>();
         services.AddHostedService<CartCheckoutConsumer>();
+        services.AddHostedService<OrderPaidConsumer>();
 
         return services;
     }

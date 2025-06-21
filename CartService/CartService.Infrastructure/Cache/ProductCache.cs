@@ -5,15 +5,19 @@ namespace CartService.Infrastructure.Cache;
 
 public class ProductCache : IProductCache
 {
-    private List<Guid> _ids = new();
+    private Dictionary<Guid, ProductDto> _products = new();
 
-    public IReadOnlyCollection<Guid> ProductIds => _ids.AsReadOnly();
+    public IReadOnlyCollection<Guid> ProductIds => _products.Keys.ToList();
+
+    public IReadOnlyCollection<ProductDto> Products => _products.Values.ToList();
 
     public void Set(ProductCacheEvent cache)
     {
-        _ids = cache.Products.Select(p => p.Id).ToList();
+        _products = cache.Products.ToDictionary(p => p.Id);
     }
 
-    public bool Contains(Guid id) => _ids.Contains(id);
+    public bool Contains(Guid id) => _products.ContainsKey(id);
+
+    public ProductDto? Get(Guid id) => _products.TryGetValue(id, out var p) ? p : null;
 }
 

@@ -27,7 +27,7 @@ public class AdminCartController(IMediator mediator) : ControllerBase
 
     [HttpPost("{userId}/additem")]
     [SwaggerOperation(Summary = "Add item to user's cart", Description = "Access: Admin only")]
-    public async Task<IActionResult> AddItem(Guid userId, [FromBody] CartItemDto item)
+    public async Task<IActionResult> AddItem(Guid userId, [FromBody] AddCartItemDto item)
     {
         await _mediator.Send(new AddItemCommand(userId, item));
         return Ok();

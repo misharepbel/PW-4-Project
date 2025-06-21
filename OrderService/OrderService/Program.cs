@@ -5,21 +5,31 @@ using Microsoft.OpenApi.Models;
 using OrderService.Application.Extensions;
 using OrderService.Infrastructure.Extensions;
 using OrderService.Infrastructure.Data;
+using OrderService.Application.Interfaces;
+using OrderService.Application.DTO;
+using OrderService.Domain.Repositories;
+using System.Linq;
 using System.Reflection;
+using Hellang.Middleware.ProblemDetails;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 
 namespace OrderService
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddApplicationServices();
             builder.Services.AddInfrastructureServices(builder.Configuration);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(opts =>
+            {
+                opts.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+            });
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
@@ -73,12 +83,51 @@ namespace OrderService
 
             builder.Services.AddAuthorization();
 
+            builder.Services.AddProblemDetails(options =>
+            {
+                options.Map<ArgumentException>(ex => new ProblemDetails
+                {
+                    Title = ex.Message,
+                    Status = StatusCodes.Status400BadRequest
+                });
+
+                options.Map<InvalidOperationException>(ex => new ProblemDetails
+                {
+                    Title = ex.Message,
+                    Status = StatusCodes.Status400BadRequest
+                });
+
+                options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
+
+                options.OnBeforeWriteDetails = (ctx, details) =>
+                {
+                    if (ctx.Response.StatusCode == StatusCodes.Status500InternalServerError)
+                    {
+                        var loggerFactory = ctx.RequestServices.GetRequiredService<ILoggerFactory>();
+                        var logger = loggerFactory.CreateLogger("OrderService");
+                        var error = ctx.Features.Get<IExceptionHandlerFeature>()?.Error;
+                        if (error != null)
+                        {
+                            logger.LogError(error, "Unhandled exception occurred");
+                        }
+                    }
+                };
+            });
+
             var app = builder.Build();
+
+            app.UseProblemDetails();
 
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
-                db.Database.Migrate();
+                await db.Database.MigrateAsync();
+
+                var repo = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+                var producer = scope.ServiceProvider.GetRequiredService<IOrderCacheProducer>();
+                var orders = await repo.GetAllAsync();
+                var map = orders.ToDictionary(o => o.Id, o => o.UserId);
+                await producer.PublishAsync(new OrderCacheEvent { Orders = map });
             }
 
             app.UseCors();
@@ -92,7 +141,7 @@ namespace OrderService
             app.UseAuthorization();
             app.MapControllers();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

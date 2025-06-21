@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using UserService.Application.Interfaces;
 using UserService.Domain.Entities;
 using UserService.Domain.Interfaces;
+using UserService.Domain.Exceptions;
 
 namespace UserService.Application.Users.Commands;
 
@@ -22,11 +23,11 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, string>
     public async Task<string> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _repo.GetByEmailAsync(request.Email)
-                   ?? throw new Exception("Invalid email or password");
+                   ?? throw new UserNotFoundException(request.Email);
 
         var result = _hasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
         if (result == PasswordVerificationResult.Failed)
-            throw new Exception("Invalid email or password");
+            throw new UserNotFoundException(request.Email);
 
         return _jwt.GenerateToken(user);
     }
