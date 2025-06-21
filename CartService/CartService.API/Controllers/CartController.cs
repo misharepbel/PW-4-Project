@@ -28,8 +28,7 @@ public class CartController(IMediator mediator) : ControllerBase
     [SwaggerOperation(Summary = "Show cached products", Description = "Access: User & Admin")]
     public IActionResult GetCachedProducts([FromServices] IProductCache cache)
     {
-        var cachedItems = cache;
-        return Ok(cachedItems);
+        return Ok(cache.Products);
     }
 
     [HttpGet("mycart")]
@@ -39,7 +38,7 @@ public class CartController(IMediator mediator) : ControllerBase
 
     [HttpPost("item")]
     [SwaggerOperation(Summary = "Add item to cart", Description = "Access: User & Admin")]
-    public async Task<IActionResult> AddItem([FromBody] CartItemDto item)
+    public async Task<IActionResult> AddItem([FromBody] AddCartItemDto item)
     {
         await _mediator.Send(new AddItemCommand(CurrentUserId(), item));
         return Ok();
