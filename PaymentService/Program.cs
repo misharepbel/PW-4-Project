@@ -95,7 +95,6 @@ builder.Services.AddProblemDetails(options =>
 });
 
 builder.Services.AddSingleton<IOrderPaidProducer, KafkaOrderPaidProducer>();
-builder.Services.AddSingleton<IEmailProducer, KafkaEmailProducer>();
 
 var app = builder.Build();
 

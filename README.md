@@ -124,4 +124,4 @@ Below is a short description of the available endpoints in each service and how 
 2. User adds items to cart -> `ProductCacheEvent` keeps cache updated
 3. User checks out -> `CartCheckedOutEvent` on **cart-checked-out** -> OrderService creates the order and publishes `OrderCreatedEvent`
 4. `OrderCreatedEvent` -> CartService clears the cart
-5. Payment succeeds -> `OrderPaidEvent` -> order status updated and receipt email sent
+5. Payment succeeds -> `OrderPaidEvent` -> OrderService marks the order paid and forwards a receipt to NotificationService
