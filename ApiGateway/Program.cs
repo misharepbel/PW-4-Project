@@ -54,15 +54,21 @@ namespace ApiGateway
                     Title = "ApiGateway",
                     Version = "v1",
                     Description = """
-                        Entry point for all TeaShop micro-services.
+                        Entry point for all TeaShop microservices.
 
-                        • Select a cluster (e.g. **OrderService V1**) in the drop-down
-                          to view its endpoints routed through the gateway.
+                        Services:
+                        • CatalogService – product and category management
+                        • CartService – shopping cart storage
+                        • OrderService – order processing
+                        • PaymentService – payment handling
+                        • UserService – authentication and user accounts
+                        • NotificationService – email notifications
 
-                        Example workflow with events:
-                        Register -> UserRegisteredEvent -> Add to cart ->
-                        Checkout -> CartCheckedOutEvent -> OrderService -> OrderCreatedEvent ->
-                        Pay -> OrderPaidEvent -> email receipt
+                        Select a cluster (e.g. **OrderService V1**) to browse endpoints.
+
+                        Example flow:
+                        Register -> Add to cart -> Checkout -> OrderCreated ->
+                        Pay -> OrderPaid -> email receipt
 
                         ⚠️  Downstream service docs may take a few seconds after
                            startup to appear.
