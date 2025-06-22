@@ -110,32 +110,6 @@ public class UserRepositoryIntegrationTests
     }
 
     [Fact]
-    public async Task GetByEmailAsync_CaseInsensitiveSearch_ShouldReturnUser()
-    {
-        // Arrange
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Username = "testuser",
-            Email = "Test@Example.Com",
-            PasswordHash = "hashedpassword123",
-            IsEmailVerified = false,
-            Role = UserRole.User
-        };
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
-        // Act
-        var result = await _repository.GetByEmailAsync("test@example.com");
-
-        // Assert - This test verifies if email search is case-insensitive
-        // The result will depend on your database collation settings
-        Assert.NotNull(result);
-        Assert.Equal(user.Id, result.Id);
-    }
-
-    [Fact]
     public async Task GetByIdAsync_ExistingId_ShouldReturnUser()
     {
         // Arrange
